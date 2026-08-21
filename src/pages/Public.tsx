@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { collections, timeline, contentItems, hallMembers, achievements, researchGroups } from '../data';
 import type { Page } from '../data';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
@@ -13,6 +13,32 @@ interface HomeProps {
 export function HomePage({ navigate, role }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedYear, setExpandedYear] = useState<number | null>(null);
+  const [activeSection, setActiveSection] = useState('hero');
+
+  const sections = [
+    { id: 'hero',          label: 'Inicio',        icon: '⌂', preview: 'Presentación del museo y búsqueda rápida.' },
+    { id: 'colecciones',   label: 'Colecciones',   icon: '◫', preview: '6 colecciones temáticas del programa.' },
+    { id: 'cronologia',    label: 'Historia',      icon: '◌', preview: 'Línea del tiempo de 50 años de excelencia.' },
+    { id: 'logros',        label: 'Logros',        icon: '✦', preview: 'Premios y reconocimientos institucionales.' },
+    { id: 'investigacion', label: 'Investigación', icon: '◈', preview: 'Semilleros y grupos de investigación activos.' },
+    { id: 'agenda',        label: 'Agenda',        icon: '◷', preview: 'Próximos eventos del programa.' },
+    { id: 'reciente',      label: 'Reciente',      icon: '◉', preview: 'Últimas incorporaciones al archivo digital.' },
+  ];
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    sections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { rootMargin: '-40% 0px -50% 0px' }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +48,59 @@ export function HomePage({ navigate, role }: HomeProps) {
   const published = contentItems.filter(i => i.status === 'publicado' || i.status === 'institucional');
 
   return (
-    <div>
+    <div className="relative">
+      {/* ─── Right ScrollSpy Nav ─────────────────────────────── */}
+      <nav
+        aria-label="Navegación de secciones"
+        className="hidden xl:flex flex-col gap-3 fixed right-5 z-40"
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+      >
+        {sections.map(sec => {
+          const isActive = activeSection === sec.id;
+          return (
+            <a
+              key={sec.id}
+              href={`#${sec.id}`}
+              title={sec.label}
+              className="group flex items-center justify-end gap-3"
+              style={{ textDecoration: 'none' }}
+            >
+              {/* Preview tooltip (left side, appears on hover) */}
+              <div
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none"
+                style={{ transform: isActive ? 'translateX(0)' : undefined }}
+              >
+                <div
+                  className="text-right rounded-lg px-3 py-2 shadow-xl"
+                  style={{
+                    background: 'rgba(15,12,12,0.95)',
+                    border: '1px solid rgba(211,47,47,0.25)',
+                    backdropFilter: 'blur(8px)',
+                    minWidth: '160px',
+                  }}
+                >
+                  <div className="text-xs font-semibold mb-0.5" style={{ color: '#d32f2f' }}>{sec.label}</div>
+                  <div className="text-xs leading-relaxed" style={{ color: 'var(--secondary-foreground)' }}>{sec.preview}</div>
+                </div>
+              </div>
+              {/* Dot indicator */}
+              <div
+                className="flex-shrink-0 rounded-full transition-all duration-300"
+                style={{
+                  width: isActive ? '12px' : '7px',
+                  height: isActive ? '12px' : '7px',
+                  background: isActive ? '#d32f2f' : 'rgba(211,47,47,0.3)',
+                  boxShadow: isActive ? '0 0 10px rgba(211,47,47,0.6)' : 'none',
+                  border: isActive ? '2px solid rgba(211,47,47,0.4)' : '1px solid rgba(211,47,47,0.2)',
+                }}
+              />
+            </a>
+          );
+        })}
+      </nav>
+
       {/* Hero */}
-      <section className="relative min-h-[82vh] flex flex-col items-center justify-center text-center overflow-hidden">
+      <section id="hero" className="relative py-20 md:py-28 flex flex-col items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1562774053-701939374585?w=1400&h=900&fit=crop&auto=format"
@@ -82,16 +158,10 @@ export function HomePage({ navigate, role }: HomeProps) {
             )}
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-40">
-          <div className="text-xs font-mono" style={{ color: '#d32f2f' }}>Descubrir</div>
-          <div className="w-px h-8" style={{ background: 'linear-gradient(to bottom, #d32f2f, transparent)' }} />
-        </div>
       </section>
 
       {/* Collections */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="colecciones" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Archivo" title="Colecciones" subtitle="Seis colecciones temáticas que documentan la trayectoria del programa." />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {collections.map(col => (
@@ -118,7 +188,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Timeline */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="cronologia" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Cronología" title="Línea del Tiempo" subtitle="Los hitos que definen medio siglo de formación de ingenieros." />
         <div className="relative">
           <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px timeline-line transform md:-translate-x-px" />
@@ -171,7 +241,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Logros Destacados */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="logros" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Premios" title="Logros Destacados" subtitle="Reconocimientos que avalan la excelencia del programa." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {achievements.slice(0, 3).map(ach => (
@@ -193,7 +263,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Semilleros y Grupos de Investigación */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="investigacion" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Investigación" title="Semilleros y Grupos" subtitle="La fuerza investigativa que impulsa la innovación." />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
            {researchGroups.filter(g => g.category === 'semillero').map(g => (
@@ -224,7 +294,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Eventos Próximos */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="agenda" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Agenda" title="Eventos Próximos" subtitle="Actividades destacadas de nuestra comunidad." />
         <div className="flex flex-col md:flex-row gap-5">
            {contentItems.filter(i => i.category === 'eventos').slice(0, 3).map((ev, i) => (
@@ -240,7 +310,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Recent content */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="reciente" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <div className="flex items-center justify-between mb-8">
           <SectionHeader label="Reciente" title="Últimas Incorporaciones" />
           <button onClick={() => navigate('explorar')} className="text-sm btn-outline-gold px-4 py-2 rounded flex-shrink-0">
