@@ -263,10 +263,9 @@ export function HomePage({ navigate, role }: HomeProps) {
 
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
-      {/* Stats + CTA combined */}
+      {/* Stats */}
       <section className="py-16">
-        {/* Stats */}
-        <div className="max-w-5xl mx-auto px-4 md:px-8 mb-16">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { label: 'Piezas en el Archivo', value: '1.353' },
@@ -279,25 +278,6 @@ export function HomePage({ navigate, role }: HomeProps) {
                 <div className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--muted-foreground)' }}>{s.label}</div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>
-            Sé parte de la historia
-          </h2>
-          <p className="text-base mb-8" style={{ color: 'var(--muted-foreground)' }}>
-            Accede con tu correo institucional para registrar proyectos, investigaciones y logros del programa.
-          </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <button onClick={() => navigate('login')}
-              className="btn-primary btn-float px-8 py-3 rounded text-sm font-semibold">
-              Iniciar Sesión
-            </button>
-            <button onClick={() => navigate('explorar')} className="btn-outline-primary px-8 py-3 rounded text-sm">
-              Explorar Archivo
-            </button>
           </div>
         </div>
       </section>
