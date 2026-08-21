@@ -51,22 +51,22 @@
   --status-rejected: #ef4444;
 }
 
-/* ── Light mode (Universidad Libre: blanco, negro, dorado) ── */
+/* ── Light mode (Universidad Libre: blanco, negro, rojo) ── */
 [data-theme="light"] {
   --background: #f5f5f0;
   --foreground: #111111;
   --card: #ffffff;
   --card-foreground: #1a1a1a;
-  --primary: #cc0000;
+  --primary: #d32f2f;
   --primary-foreground: #ffffff;
-  --secondary: #ebebе6;
+  --secondary: #ebebe6;
   --secondary-foreground: #333333;
   --muted: #eeede8;
   --muted-foreground: #666660;
-  --accent: #cc0000;
+  --accent: #d32f2f;
   --accent-foreground: #ffffff;
-  --border: rgba(180, 140, 40, 0.22);
-  --ring: #cc0000;
+  --border: rgba(211, 47, 47, 0.15);
+  --ring: #d32f2f;
 }
 
 [data-theme="light"] body {
@@ -81,7 +81,7 @@
 }
 
 [data-theme="light"] .museum-card:hover {
-  border-color: rgba(204, 0, 0, 0.5);
+  border-color: rgba(211, 47, 47, 0.45);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
@@ -92,7 +92,7 @@
 }
 
 [data-theme="light"] .museum-input:focus {
-  border-color: rgba(204, 0, 0, 0.6);
+  border-color: rgba(211, 47, 47, 0.6);
   background: rgba(0, 0, 0, 0.02);
 }
 
@@ -101,10 +101,10 @@
 }
 
 [data-theme="light"] .section-divider {
-  background: linear-gradient(to right, transparent, rgba(204, 0, 0, 0.25), transparent);
+  background: linear-gradient(to right, transparent, rgba(211, 47, 47, 0.25), transparent);
 }
 
-[data-theme="light"] .text-gold-gradient {
+[data-theme="light"] .text-primary-gradient {
   background: linear-gradient(135deg, #990000 0%, #d32f2f 50%, #660000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -114,19 +114,19 @@
 /* Light mode header */
 [data-theme="light"] header {
   background: rgba(255, 255, 255, 0.97) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+  border-bottom-color: rgba(211, 47, 47, 0.12) !important;
 }
 
 /* Light mode footer */
 [data-theme="light"] footer {
   background: #f0efea !important;
-  border-top-color: rgba(0, 0, 0, 0.08) !important;
+  border-top-color: rgba(211, 47, 47, 0.1) !important;
 }
 
 /* Light mode sidebar */
 [data-theme="light"] aside > div {
   background: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(211, 47, 47, 0.1) !important;
 }
 
 /* Light mode stats bar */
@@ -157,11 +157,11 @@ header, footer, .museum-card, aside > div {
 }
 
 [data-theme="light"] .btn-float {
-  box-shadow: 0 4px 14px rgba(204, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(211, 47, 47, 0.3), 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="light"] .btn-float:hover {
-  box-shadow: 0 8px 24px rgba(204, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 8px 24px rgba(211, 47, 47, 0.45), 0 4px 10px rgba(0, 0, 0, 0.14);
 }
 
 /* Theme toggle button */
@@ -209,8 +209,8 @@ body {
 .font-serif { font-family: var(--font-serif); }
 .font-mono-data { font-family: var(--font-mono); }
 
-/* Gold gradient text */
-.text-gold-gradient {
+/* Primary gradient text */
+.text-primary-gradient {
   background: linear-gradient(135deg, #d32f2f 0%, #ff4d4d 50%, #990000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -218,8 +218,8 @@ body {
 }
 
 /* Hairline border */
-.border-gold { border-color: rgba(211, 47, 47, 0.3); }
-.border-gold-strong { border-color: rgba(211, 47, 47, 0.6); }
+.border-primary { border-color: rgba(211, 47, 47, 0.3); }
+.border-primary-strong { border-color: rgba(211, 47, 47, 0.6); }
 
 /* Card styles */
 .museum-card {
@@ -233,7 +233,7 @@ body {
 }
 
 /* Button base */
-.btn-gold {
+.btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);
   font-family: var(--font-sans);
@@ -241,9 +241,9 @@ body {
   letter-spacing: 0.04em;
   transition: background 0.2s, opacity 0.2s;
 }
-.btn-gold:hover { background: #e53935; }
+.btn-primary:hover { background: #e53935; }
 
-.btn-outline-gold {
+.btn-outline-primary {
   background: transparent;
   border: 1px solid rgba(211, 47, 47,0.5);
   color: var(--primary);
@@ -251,7 +251,7 @@ body {
   font-weight: 500;
   transition: background 0.2s, border-color 0.2s;
 }
-.btn-outline-gold:hover {
+.btn-outline-primary:hover {
   background: rgba(211, 47, 47,0.08);
   border-color: rgba(211, 47, 47,0.8);
 }

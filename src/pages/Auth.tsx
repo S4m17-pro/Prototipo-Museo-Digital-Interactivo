@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Page, Role } from '../data';
+import { StepIndicator } from '../components/UI';
 
 // ── LOGIN ────────────────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ export function LoginPage({ navigate, onLogin }: LoginProps) {
               </div>
             )}
 
-            <button type="submit" className="btn-gold w-full py-3 rounded font-semibold">
+            <button type="submit" className="btn-primary w-full py-3 rounded font-semibold">
               Ingresar
             </button>
           </form>
@@ -186,7 +187,7 @@ export function TwoFAPage({ onVerify, navigate }: TwoFAProps) {
               </div>
             )}
 
-            <button type="submit" className="btn-gold w-full py-3 rounded font-semibold">
+            <button type="submit" className="btn-primary w-full py-3 rounded font-semibold">
               Verificar Identidad
             </button>
           </form>
@@ -254,24 +255,7 @@ export function RegistroPage({ navigate, onRegister }: RegistroProps) {
         </div>
 
         {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-6 justify-center">
-          {[1, 2].map(s => (
-            <div key={s} className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono"
-                style={{
-                  background: step >= s ? '#d32f2f' : 'rgba(255,255,255,0.06)',
-                  color: step >= s ? 'var(--background)' : 'var(--muted-foreground)',
-                  border: step >= s ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                }}>
-                {step > s ? '✓' : s}
-              </div>
-              <span className="text-xs" style={{ color: step >= s ? 'var(--secondary-foreground)' : 'var(--muted-foreground)' }}>
-                {['Datos personales', 'Seguridad'][s - 1]}
-              </span>
-              {s < 2 && <div className="w-8 h-px mx-1" style={{ background: step > s ? '#d32f2f' : 'rgba(255,255,255,0.1)' }} />}
-            </div>
-          ))}
-        </div>
+        <StepIndicator steps={['Datos personales', 'Seguridad']} currentStep={step} />
 
         <div className="museum-card rounded-lg p-7">
           <form onSubmit={handleNext} className="flex flex-col gap-4">
@@ -329,11 +313,11 @@ export function RegistroPage({ navigate, onRegister }: RegistroProps) {
 
             <div className="flex gap-2">
               {step === 2 && (
-                <button type="button" onClick={() => setStep(1)} className="btn-outline-gold px-4 py-2.5 rounded text-sm flex-1">
+                <button type="button" onClick={() => setStep(1)} className="btn-outline-primary px-4 py-2.5 rounded text-sm flex-1">
                   Anterior
                 </button>
               )}
-              <button type="submit" className="btn-gold py-2.5 rounded font-semibold text-sm flex-1">
+              <button type="submit" className="btn-primary py-2.5 rounded font-semibold text-sm flex-1">
                 {step === 1 ? 'Continuar →' : 'Crear cuenta'}
               </button>
             </div>

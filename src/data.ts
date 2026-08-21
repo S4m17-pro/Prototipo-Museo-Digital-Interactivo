@@ -2,7 +2,7 @@ export type Status = 'publicado' | 'pendiente' | 'institucional' | 'devuelto';
 export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado';
 
 export type Page =
-  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama'
+  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros'
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'

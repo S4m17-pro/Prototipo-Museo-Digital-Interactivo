@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Page } from '../data';
 import { contentItems } from '../data';
-import { StatusBadge, SectionHeader, StatCard } from '../components/UI';
+import { StatusBadge, SectionHeader, StepIndicator, Checkbox } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
 // ── DASHBOARD DOCENTE ────────────────────────────────────────────────────────
@@ -25,36 +25,66 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
             <div>
-              <div className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color: '#d32f2f' }}>Panel Docente</div>
-              <h1 className="font-serif text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Mi Espacio</h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Dr. Hernando Casas · Grupo GISI · Cat. Investigador Asociado</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(211, 47, 47,0.1)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47,0.25)' }}>
+                  Docente
+                </span>
+                <span className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>Grupo GISI</span>
+              </div>
+              <h1 className="font-serif text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Buenos días, Dr. Casas</h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Cat. Investigador Asociado · 2 contribuciones pendientes de revisión</p>
             </div>
-            <button onClick={() => navigate('doc-wizard')} className="btn-gold px-5 py-2.5 rounded text-sm font-semibold">
-              + Registrar Evidencia
+            <button onClick={() => navigate('doc-wizard')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold flex items-center gap-2">
+              <span className="text-lg leading-none">+</span> Registrar Evidencia
             </button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Contribuciones" value={18} sub="Total registradas" />
-            <StatCard label="Publicadas" value={15} sub="En el archivo" color="#22c55e" />
-            <StatCard label="En Revisión" value={2} sub="Pendientes" color="#f97316" />
-            <StatCard label="Estudiantes Guiados" value={34} sub="En proyectos activos" color="#a855f7" />
+            {[
+              { label: 'Contribuciones', value: 18, sub: 'Total registradas', color: '#d32f2f', icon: '📝', bg: 'rgba(211, 47, 47, 0.06)' },
+              { label: 'Publicadas', value: 15, sub: 'En el archivo', color: '#22c55e', icon: '✓', bg: 'rgba(34, 197, 94, 0.06)' },
+              { label: 'En Revisión', value: 2, sub: 'Pendientes', color: '#f97316', icon: '⏳', bg: 'rgba(249, 115, 22, 0.06)' },
+              { label: 'Estudiantes', value: 34, sub: 'Proyectos activos', color: '#a855f7', icon: '🎓', bg: 'rgba(168, 85, 247, 0.06)' },
+            ].map(s => (
+              <div key={s.label} className="museum-card rounded p-5 transition-all duration-200 hover:scale-[1.02] cursor-default"
+                style={{ borderLeft: `3px solid ${s.color}` }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded flex items-center justify-center text-sm" style={{ background: s.bg, color: s.color }}>
+                    {s.icon}
+                  </div>
+                  <div className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--muted-foreground)' }}>{s.label}</div>
+                </div>
+                <div className="font-serif text-3xl font-bold" style={{ color: s.color }}>{s.value.toLocaleString()}</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>{s.sub}</div>
+              </div>
+            ))}
           </div>
 
-          <div className="flex gap-4 border-b border-gray-800 mb-6">
+          <div className="flex gap-0 border-b mb-6" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <button
               onClick={() => setActiveTab('mio')}
-              className={`py-2 px-1 border-b-2 text-sm font-medium transition-colors ${activeTab === 'mio' ? 'border-yellow-500 text-yellow-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
+              className="py-3 px-4 border-b-2 text-sm font-medium transition-all duration-200"
+              style={{
+                borderColor: activeTab === 'mio' ? '#d32f2f' : 'transparent',
+                color: activeTab === 'mio' ? '#d32f2f' : 'var(--muted-foreground)',
+                background: activeTab === 'mio' ? 'rgba(211, 47, 47, 0.04)' : 'transparent',
+              }}
             >
-              Mi Contenido
+              📄 Mi Contenido
             </button>
             <button
               onClick={() => setActiveTab('involucrado')}
-              className={`py-2 px-1 border-b-2 text-sm font-medium flex items-center gap-2 transition-colors ${activeTab === 'involucrado' ? 'border-yellow-500 text-yellow-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
+              className="py-3 px-4 border-b-2 text-sm font-medium flex items-center gap-2 transition-all duration-200"
+              style={{
+                borderColor: activeTab === 'involucrado' ? '#d32f2f' : 'transparent',
+                color: activeTab === 'involucrado' ? '#d32f2f' : 'var(--muted-foreground)',
+                background: activeTab === 'involucrado' ? 'rgba(211, 47, 47, 0.04)' : 'transparent',
+              }}
             >
-              Me Involucran
+              👥 Me Involucran
               {pendingInvolucrado.length > 0 && (
-                <span className="bg-orange-500 text-black text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full"
+                  style={{ background: 'var(--status-pending, #f97316)', color: '#000' }}>
                   {pendingInvolucrado.length}
                 </span>
               )}
@@ -67,7 +97,7 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
               <div className="museum-card rounded p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Mis Contribuciones</h3>
-                  <button onClick={() => navigate('doc-wizard')} className="text-xs btn-outline-gold px-2 py-1 rounded">+ Nueva</button>
+                  <button onClick={() => navigate('doc-wizard')} className="text-xs btn-outline-primary px-2 py-1 rounded">+ Nueva</button>
                 </div>
                 <div className="flex flex-col gap-3">
                   {myContent.slice(0, 3).map(item => (
@@ -88,7 +118,7 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
                 </div>
                 <div className="flex flex-col gap-3">
                   {involucradoContent.length === 0 ? (
-                    <p className="text-sm text-gray-400">No hay proyectos que te involucren aún.</p>
+                    <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No hay proyectos que te involucren aún.</p>
                   ) : (
                     involucradoContent.map(item => (
                       <div key={item.id} className="flex items-center justify-between gap-3 p-3 rounded" style={{ background: 'rgba(255,255,255,0.03)' }}>
@@ -97,7 +127,7 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
                           <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>Enviado por: {item.author}</div>
                           <div className="mt-1"><StatusBadge status={item.status} /></div>
                         </div>
-                        <button onClick={() => navigate('detalle', item.id)} className="text-xs btn-outline-gold px-3 py-1.5 rounded flex-shrink-0">
+                        <button onClick={() => navigate('detalle', item.id)} className="text-xs btn-outline-primary px-3 py-1.5 rounded flex-shrink-0">
                           Ver detalle
                         </button>
                       </div>
@@ -110,17 +140,21 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
             {/* Notifications */}
             <div className="museum-card rounded p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Notificaciones</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>🔔 Notificaciones</h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(211, 47, 47, 0.12)', color: '#d32f2f' }}>3</span>
+                </div>
                 <button onClick={() => navigate('doc-notificaciones')} className="text-xs" style={{ color: '#d32f2f' }}>Ver todas</button>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 {notifications.map((n, i) => (
-                  <div key={i} className="flex gap-3 items-start">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                  <div key={i} className="flex gap-3 items-start p-3 rounded transition-colors hover:bg-white/[0.02]"
+                    style={{ borderLeft: `3px solid ${n.color}` }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs flex-shrink-0"
                       style={{ background: `${n.color}15`, color: n.color }}>
                       {n.icon}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm" style={{ color: 'var(--secondary-foreground)' }}>{n.message}</p>
                       <span className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>{n.time}</span>
                     </div>
@@ -177,10 +211,10 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                 Estado: <strong>En Cola de Validación</strong>
               </div>
               <div className="flex gap-2 justify-center">
-                <button onClick={() => navigate('doc-notificaciones')} className="btn-outline-gold px-4 py-2 rounded text-sm">
+                <button onClick={() => navigate('doc-notificaciones')} className="btn-outline-primary px-4 py-2 rounded text-sm">
                   Ver Notificaciones
                 </button>
-                <button onClick={() => navigate('doc-dashboard')} className="btn-gold px-4 py-2 rounded text-sm">
+                <button onClick={() => navigate('doc-dashboard')} className="btn-primary px-4 py-2 rounded text-sm">
                   Ir al Dashboard
                 </button>
               </div>
@@ -199,26 +233,7 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
           <SectionHeader label="Nuevo registro" title="Registrar Evidencia" />
 
           {/* Step indicator */}
-          <div className="flex items-center gap-0 mb-8 overflow-x-auto">
-            {steps.map((s, i) => (
-              <div key={s} className="flex items-center flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all"
-                    style={{
-                      background: step > i + 1 ? '#22c55e' : step === i + 1 ? '#d32f2f' : 'rgba(255,255,255,0.06)',
-                      color: step >= i + 1 ? 'var(--background)' : 'var(--muted-foreground)',
-                    }}>
-                    {step > i + 1 ? '✓' : i + 1}
-                  </div>
-                  <span className="text-sm hidden sm:block" style={{ color: step === i + 1 ? '#d32f2f' : 'var(--muted-foreground)' }}>{s}</span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="w-8 md:w-16 h-px mx-2 transition-all" style={{ background: step > i + 1 ? '#22c55e' : 'rgba(255,255,255,0.08)' }} />
-                )}
-              </div>
-            ))}
-          </div>
+          <StepIndicator steps={steps} currentStep={step} completedStep={step > 1 ? step - 1 : undefined} />
 
           <div className="max-w-2xl">
             {/* Step 1: General data */}
@@ -263,7 +278,7 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                     placeholder="Describe el contenido, alcance y relevancia institucional…"
                     rows={4} className="museum-input w-full px-4 py-2.5 rounded text-sm resize-none" />
                 </div>
-                <button onClick={() => setStep(2)} className="btn-gold py-2.5 rounded font-semibold text-sm">
+                <button onClick={() => setStep(2)} className="btn-primary py-2.5 rounded font-semibold text-sm">
                   Continuar: Evidencias →
                 </button>
               </div>
@@ -301,8 +316,8 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={() => setStep(1)} className="btn-outline-gold px-5 py-2.5 rounded text-sm flex-1">← Anterior</button>
-                  <button onClick={() => setStep(3)} className="btn-gold px-5 py-2.5 rounded font-semibold text-sm flex-1">Continuar: Revisión →</button>
+                  <button onClick={() => setStep(1)} className="btn-outline-primary px-5 py-2.5 rounded text-sm flex-1">← Anterior</button>
+                  <button onClick={() => setStep(3)} className="btn-primary px-5 py-2.5 rounded font-semibold text-sm flex-1">Continuar: Revisión →</button>
                 </div>
               </div>
             )}
@@ -320,19 +335,12 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                     { key: 'institutional', label: 'El contenido tiene relevancia institucional y contribuye al legado del programa' },
                     { key: 'reviewed', label: 'He revisado la información y confirmo que es correcta y completa' },
                   ].map(item => (
-                    <label key={item.key} className="flex items-start gap-3 cursor-pointer group">
-                      <div
-                        className="w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center transition-all cursor-pointer"
-                        style={{
-                          background: checklist[item.key as keyof typeof checklist] ? '#d32f2f' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${checklist[item.key as keyof typeof checklist] ? '#d32f2f' : 'rgba(255,255,255,0.15)'}`,
-                        }}
-                        onClick={() => setChecklist(c => ({ ...c, [item.key]: !c[item.key as keyof typeof checklist] }))}
-                      >
-                        {checklist[item.key as keyof typeof checklist] && <span className="text-xs text-black font-bold">✓</span>}
-                      </div>
-                      <span className="text-sm" style={{ color: 'var(--secondary-foreground)' }}>{item.label}</span>
-                    </label>
+                    <Checkbox
+                      key={item.key}
+                      checked={checklist[item.key as keyof typeof checklist]}
+                      onChange={() => setChecklist(c => ({ ...c, [item.key]: !c[item.key as keyof typeof checklist] }))}
+                      label={item.label}
+                    />
                   ))}
                 </div>
                 {!allChecked && (
@@ -341,7 +349,7 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={() => setStep(2)} className="btn-outline-gold px-5 py-2.5 rounded text-sm flex-1">← Anterior</button>
+                  <button onClick={() => setStep(2)} className="btn-outline-primary px-5 py-2.5 rounded text-sm flex-1">← Anterior</button>
                   <button onClick={() => allChecked && setStep(4)}
                     className="px-5 py-2.5 rounded font-semibold text-sm flex-1 transition-opacity"
                     style={{ background: allChecked ? '#d32f2f' : 'rgba(211, 47, 47,0.3)', color: allChecked ? 'var(--background)' : 'var(--muted-foreground)', cursor: allChecked ? 'pointer' : 'not-allowed' }}>
@@ -376,9 +384,9 @@ export function DocWizard({ navigate, onSubmit }: WizardProps) {
                   Al enviar, esta evidencia pasará a la cola de validación administrativa. Recibirás una notificación con el resultado.
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setStep(3)} className="btn-outline-gold px-5 py-2.5 rounded text-sm flex-1">← Revisar</button>
+                  <button onClick={() => setStep(3)} className="btn-outline-primary px-5 py-2.5 rounded text-sm flex-1">← Revisar</button>
                   <button onClick={() => { setSubmitted(true); onSubmit(); }}
-                    className="btn-gold px-5 py-3 rounded font-semibold text-sm flex-1">
+                    className="btn-primary px-5 py-3 rounded font-semibold text-sm flex-1">
                     Enviar Evidencia ✓
                   </button>
                 </div>
@@ -408,10 +416,12 @@ export function DocNotificaciones({ navigate }: { navigate: (page: Page) => void
         <div className="flex-1 min-w-0">
           <SectionHeader label="Actualizaciones" title="Notificaciones" subtitle="Historial de actividad sobre tus contribuciones." />
           <div className="flex flex-col gap-4">
-            {notifications.map(n => (
-              <div key={n.id} className="museum-card rounded p-5 flex gap-4">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm flex-shrink-0"
-                  style={{ background: `${n.color}12`, color: n.color, border: `1px solid ${n.color}30` }}>
+            {notifications.map((n, i) => (
+              <div key={n.id}
+                className="museum-card rounded p-5 flex gap-4 transition-all duration-300 hover:scale-[1.005]"
+                style={{ borderLeft: `4px solid ${n.color}`, animation: `fadeInUp 0.4s ease-out ${i * 0.08}s both` }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                  style={{ background: `${n.color}12`, color: n.color, border: `1.5px solid ${n.color}30` }}>
                   {n.icon}
                 </div>
                 <div className="flex-1">
@@ -421,7 +431,7 @@ export function DocNotificaciones({ navigate }: { navigate: (page: Page) => void
                   </div>
                   <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>{n.body}</p>
                   {n.type === 'devuelto' && (
-                    <button className="text-xs mt-2 btn-outline-gold px-3 py-1 rounded">Ver nota del revisor</button>
+                    <button className="text-xs mt-2 btn-outline-primary px-3 py-1 rounded">Ver nota del revisor</button>
                   )}
                 </div>
               </div>
@@ -429,6 +439,12 @@ export function DocNotificaciones({ navigate }: { navigate: (page: Page) => void
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
