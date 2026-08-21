@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { collections, timeline, contentItems, hallMembers, achievements, researchGroups } from '../data';
 import type { Page } from '../data';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
@@ -135,16 +135,10 @@ export function HomePage({ navigate, role }: HomeProps) {
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-40">
-          <div className="text-xs font-mono" style={{ color: '#d32f2f' }}>Descubrir</div>
-          <div className="w-px h-8" style={{ background: 'linear-gradient(to bottom, #d32f2f, transparent)' }} />
-        </div>
       </section>
 
       {/* Collections */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="colecciones" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Archivo" title="Colecciones" subtitle="Seis colecciones temáticas que documentan la trayectoria del programa." />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {collections.map(col => (
@@ -171,7 +165,7 @@ export function HomePage({ navigate, role }: HomeProps) {
       <hr className="section-divider max-w-7xl mx-auto px-8" />
 
       {/* Logros Destacados */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <section id="logros" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
         <SectionHeader label="Premios" title="Logros Destacados" subtitle="Reconocimientos que avalan la excelencia del programa." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {achievements.slice(0, 3).map(ach => (
