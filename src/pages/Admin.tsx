@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { users, contentQueue, kpiData } from '../data';
 import type { Page, ContentItem } from '../data';
-import { StatusBadge, SectionHeader, StatCard, CategoryBadge } from '../components/UI';
+import { StatusBadge, SectionHeader, StatCard, CategoryBadge, StepIndicator } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
 // ── KPI CHART (CSS bars) ─────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ export function AdminDashboard({ navigate }: { navigate: (page: Page) => void })
               <h1 className="font-serif text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Dashboard</h1>
               <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Panel de control del Museo Digital Interactivo</p>
             </div>
-            <button onClick={() => navigate('admin-cola')} className="btn-gold px-5 py-2.5 rounded text-sm font-semibold flex items-center gap-2">
+            <button onClick={() => navigate('admin-cola')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold flex items-center gap-2">
               Cola de Contenido
               <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full font-mono">
                 {contentQueue.filter(i => i.status === 'pendiente').length}
@@ -109,7 +109,7 @@ export function AdminDashboard({ navigate }: { navigate: (page: Page) => void })
                     <div className="text-sm line-clamp-1" style={{ color: 'var(--secondary-foreground)' }}>{item.title}</div>
                     <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{item.submittedBy}</div>
                   </div>
-                  <button onClick={() => navigate('admin-validacion')} className="text-xs btn-outline-gold px-2 py-1 rounded flex-shrink-0">
+                  <button onClick={() => navigate('admin-validacion')} className="text-xs btn-outline-primary px-2 py-1 rounded flex-shrink-0">
                     Revisar
                   </button>
                 </div>
@@ -199,7 +199,7 @@ export function AdminUsuarios({ navigate }: { navigate: (page: Page) => void }) 
                 <tbody>
                   {filtered.map((u, i) => (
                     <tr key={u.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-                      className="transition-colors hover:bg-white/2">
+                      className="transition-colors hover:opacity-80">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0"
@@ -231,7 +231,7 @@ export function AdminUsuarios({ navigate }: { navigate: (page: Page) => void }) 
                       <td className="px-4 py-3 text-center font-mono" style={{ color: 'var(--secondary-foreground)' }}>{u.contributions}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1.5">
-                          <button className="text-xs px-2.5 py-1 rounded btn-outline-gold">Editar</button>
+                          <button className="text-xs px-2.5 py-1 rounded btn-outline-primary">Editar</button>
                           {u.status === 'pendiente' && (
                             <button className="text-xs px-2.5 py-1 rounded"
                               style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)' }}>
@@ -309,16 +309,16 @@ export function AdminCola({ navigate }: { navigate: (page: Page, id?: string) =>
                 <div className="flex flex-col gap-2 flex-shrink-0">
                   {item.status === 'pendiente' ? (
                     <button onClick={() => navigate('admin-validacion', item.id)}
-                      className="btn-gold px-4 py-2 rounded text-xs font-semibold whitespace-nowrap">
+                      className="btn-primary px-4 py-2 rounded text-xs font-semibold whitespace-nowrap">
                       Validar →
                     </button>
                   ) : (
                     <button onClick={() => navigate('admin-hall-registro')}
-                      className="btn-gold px-4 py-2 rounded text-xs font-semibold whitespace-nowrap flex items-center justify-center gap-1">
-                      <span className="text-yellow-900">⭐</span> Destacar
+                      className="btn-primary px-4 py-2 rounded text-xs font-semibold whitespace-nowrap flex items-center justify-center gap-1">
+                      <span className="text-white">⭐</span> Destacar
                     </button>
                   )}
-                  <button onClick={() => navigate('detalle', item.id)} className="btn-outline-gold px-4 py-2 rounded text-xs whitespace-nowrap">
+                  <button onClick={() => navigate('detalle', item.id)} className="btn-outline-primary px-4 py-2 rounded text-xs whitespace-nowrap">
                     Ver Contenido
                   </button>
                 </div>
@@ -350,7 +350,7 @@ export function AdminValidacion({ navigate, itemId, onApprove, onReturn }: Valid
       <div className="flex gap-8">
         <DashboardSidebar role="admin" currentPage="admin-cola" navigate={navigate} />
         <div className="flex-1 min-w-0">
-          <button onClick={() => navigate('admin-cola')} className="flex items-center gap-2 text-sm mb-8 btn-outline-gold px-3 py-1.5 rounded">
+          <button onClick={() => navigate('admin-cola')} className="flex items-center gap-2 text-sm mb-8 btn-outline-primary px-3 py-1.5 rounded">
             ← Volver a la Cola
           </button>
 
@@ -530,10 +530,10 @@ export function AdminConfirmacion({ navigate, itemId }: ConfirmacionProps) {
             </div>
 
             <div className="flex gap-3 justify-center">
-              <button onClick={() => navigate('admin-cola')} className="btn-outline-gold px-5 py-2.5 rounded text-sm">
+              <button onClick={() => navigate('admin-cola')} className="btn-outline-primary px-5 py-2.5 rounded text-sm">
                 Volver a la Cola
               </button>
-              <button onClick={() => navigate('admin-dashboard')} className="btn-gold px-5 py-2.5 rounded text-sm font-semibold">
+              <button onClick={() => navigate('admin-dashboard')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold">
                 Ir al Dashboard
               </button>
             </div>
@@ -578,7 +578,7 @@ export function AdminRegistros({ navigate }: { navigate: (page: Page, id?: strin
                       <td className="px-4 py-3" style={{ color: 'var(--secondary-foreground)' }}>{item.submittedBy}</td>
                       <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
                       <td className="px-4 py-3">
-                        <button onClick={() => navigate('detalle', item.id)} className="text-xs btn-outline-gold px-2 py-1 rounded">Ver</button>
+                        <button onClick={() => navigate('detalle', item.id)} className="text-xs btn-outline-primary px-2 py-1 rounded">Ver</button>
                       </td>
                     </tr>
                   ))}
@@ -609,7 +609,7 @@ export function AdminHallRegistro({ navigate }: { navigate: (page: Page) => void
                 style={{ background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.3)' }}>✓</div>
               <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>¡Añadido al Hall de la Fama!</h2>
               <p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>El proyecto ahora es visible en la sección principal del Hall de la Fama.</p>
-              <button onClick={() => navigate('admin-dashboard')} className="btn-gold px-5 py-2.5 rounded text-sm">Volver al Dashboard</button>
+              <button onClick={() => navigate('admin-dashboard')} className="btn-primary px-5 py-2.5 rounded text-sm">Volver al Dashboard</button>
             </div>
           </div>
         </div>
@@ -624,18 +624,7 @@ export function AdminHallRegistro({ navigate }: { navigate: (page: Page) => void
         <div className="flex-1 min-w-0">
           <SectionHeader label="Hall de la Fama" title="Destacar Proyecto" />
           
-          <div className="flex items-center gap-2 mb-8">
-            {['Selección', 'Justificación', 'Revisión', 'Confirmación'].map((s, i) => (
-              <div key={i} className="flex items-center gap-2 flex-1">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold"
-                  style={{ background: step >= i + 1 ? '#d32f2f' : 'rgba(255,255,255,0.06)', color: step >= i + 1 ? 'var(--background)' : 'var(--muted-foreground)' }}>
-                  {step > i + 1 ? '✓' : i + 1}
-                </div>
-                <span className="text-xs hidden md:inline" style={{ color: step >= i + 1 ? 'var(--secondary-foreground)' : 'var(--muted-foreground)' }}>{s}</span>
-                {i < 3 && <div className="h-px flex-1 mx-2" style={{ background: step > i + 1 ? '#d32f2f' : 'rgba(255,255,255,0.1)' }} />}
-              </div>
-            ))}
-          </div>
+          <StepIndicator steps={['Selección', 'Justificación', 'Revisión', 'Confirmación']} currentStep={step} />
 
           <div className="museum-card rounded p-6">
             <h3 className="font-serif text-xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>Paso {step}</h3>
@@ -650,10 +639,10 @@ export function AdminHallRegistro({ navigate }: { navigate: (page: Page) => void
             {step === 4 && <p className="text-sm" style={{ color: 'var(--secondary-foreground)' }}>Confirma que deseas publicar este proyecto permanentemente en el Hall de la Fama.</p>}
             
             <div className="mt-6 flex gap-3">
-              <button onClick={() => step > 1 ? setStep(step - 1) : navigate('admin-cola')} className="btn-outline-gold px-6 py-2.5 rounded text-sm">
+              <button onClick={() => step > 1 ? setStep(step - 1) : navigate('admin-cola')} className="btn-outline-primary px-6 py-2.5 rounded text-sm">
                 {step > 1 ? '← Anterior' : 'Cancelar'}
               </button>
-              <button onClick={() => step < 4 ? setStep(step + 1) : setSubmitted(true)} className="btn-gold px-8 py-2.5 rounded font-semibold text-sm flex-1">
+              <button onClick={() => step < 4 ? setStep(step + 1) : setSubmitted(true)} className="btn-primary px-8 py-2.5 rounded font-semibold text-sm flex-1">
                 {step < 4 ? 'Siguiente paso →' : 'Confirmar y Destacar'}
               </button>
             </div>

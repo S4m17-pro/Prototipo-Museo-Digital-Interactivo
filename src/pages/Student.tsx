@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { contentItems, teacherOptions } from '../data';
 import type { Page } from '../data';
-import { ContentCard, StatusBadge, SectionHeader, StatCard } from '../components/UI';
+import { ContentCard, StatusBadge, SectionHeader, StatCard, StepIndicator, Checkbox } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
 interface Props {
@@ -42,7 +42,7 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
                 {role === 'egresado' ? 'Bienvenido, egresado · Cohorte 2018' : 'Bienvenida, Ana Lucía · Ingeniería de Sistemas'}
               </p>
             </div>
-            <button onClick={() => navigate('est-contribuir')} className="btn-gold px-5 py-2.5 rounded text-sm font-semibold">
+            <button onClick={() => navigate('est-contribuir')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold">
               + Nueva Contribución
             </button>
           </div>
@@ -125,12 +125,12 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
                   <div key={item.id} className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('detalle', item.id)}>
                     <img src={item.image} alt={item.title} className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm line-clamp-1 group-hover:text-yellow-400 transition-colors" style={{ color: 'var(--secondary-foreground)' }}>{item.title}</div>
+                      <div className="text-sm line-clamp-1 group-hover:text-primary transition-colors" style={{ color: 'var(--secondary-foreground)' }}>{item.title}</div>
                       <StatusBadge status={item.status} />
                     </div>
                   </div>
                 ))}
-                <button onClick={() => navigate('est-contribuir')} className="text-xs btn-outline-gold px-3 py-1.5 rounded mt-1 w-full">
+                <button onClick={() => navigate('est-contribuir')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-1 w-full">
                   + Agregar nueva contribución
                 </button>
               </div>
@@ -157,7 +157,7 @@ export function EstFavoritos({ navigate, favorites, onToggleFavorite }: Props) {
             <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
               <span className="text-5xl opacity-20">♡</span>
               <p style={{ color: 'var(--muted-foreground)' }}>Aún no tienes favoritos. Explora el archivo y guarda piezas.</p>
-              <button onClick={() => navigate('explorar')} className="btn-outline-gold px-5 py-2 rounded text-sm">
+              <button onClick={() => navigate('explorar')} className="btn-outline-primary px-5 py-2 rounded text-sm">
                 Explorar Archivo
               </button>
             </div>
@@ -194,7 +194,11 @@ export function EstContribuir({ navigate, onSubmit }: ContribuirProps) {
   const [form, setForm] = useState({ title: '', category: '', description: '', tags: '', year: '', involvedTeacher: '' });
   const [dragOver, setDragOver] = useState(false);
   const [files, setFiles] = useState<string[]>([]);
+  const [checklist, setChecklist] = useState({
+    copyright: false, resolution: false, consent: false, description: false, teacher: false,
+  });
   const [submitted, setSubmitted] = useState(false);
+  const allChecked = Object.values(checklist).every(Boolean);
 
   const handleNext = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -224,7 +228,7 @@ export function EstContribuir({ navigate, onSubmit }: ContribuirProps) {
                 <div className="text-xs px-3 py-2 rounded" style={{ background: 'rgba(249,115,22,0.08)', color: '#fb923c', border: '1px solid rgba(249,115,22,0.2)' }}>
                   Estado: <strong>En Revisión</strong> · Recibirás una notificación al ser procesada
                 </div>
-                <button onClick={() => navigate('est-dashboard')} className="btn-gold px-5 py-2.5 rounded text-sm mt-2">
+                <button onClick={() => navigate('est-dashboard')} className="btn-primary px-5 py-2.5 rounded text-sm mt-2">
                   Volver a mi panel
                 </button>
               </div>
@@ -243,26 +247,7 @@ export function EstContribuir({ navigate, onSubmit }: ContribuirProps) {
           <SectionHeader label="Nuevo aporte" title="Registrar Contribución" subtitle="Comparte proyectos, investigaciones o documentos con el museo." />
 
           {/* Progress */}
-          <div className="flex items-center gap-2 mb-8">
-            {['Datos Generales', 'Evidencias', 'Revisión', 'Confirmación'].map((s, i) => {
-              const num = i + 1;
-              const active = step >= num;
-              return (
-                <div key={num} className="flex items-center gap-2 flex-1">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold"
-                    style={{
-                      background: active ? '#d32f2f' : 'rgba(255,255,255,0.06)',
-                      color: active ? 'var(--background)' : 'var(--muted-foreground)',
-                      border: active ? 'none' : '1px solid rgba(255,255,255,0.1)'
-                    }}>
-                    {step > num ? '✓' : num}
-                  </div>
-                  <span className="text-xs hidden md:inline" style={{ color: active ? 'var(--secondary-foreground)' : 'var(--muted-foreground)' }}>{s}</span>
-                  {num < 4 && <div className="h-px flex-1 mx-2" style={{ background: step > num ? '#d32f2f' : 'rgba(255,255,255,0.1)' }} />}
-                </div>
-              );
-            })}
-          </div>
+          <StepIndicator steps={['Datos Generales', 'Evidencias', 'Revisión', 'Confirmación']} currentStep={step} />
 
           <form onSubmit={handleNext} className="max-w-2xl flex flex-col gap-6">
             {step === 1 && (
@@ -361,18 +346,25 @@ export function EstContribuir({ navigate, onSubmit }: ContribuirProps) {
                 <h3 className="font-serif font-semibold mb-4" style={{ color: 'var(--card-foreground)' }}>Lista de Chequeo</h3>
                 <div className="flex flex-col gap-3">
                   {[
-                    'El contenido no infringe derechos de autor',
-                    'Las imágenes cumplen con la resolución mínima',
-                    'Se incluye el consentimiento de las personas identificables',
-                    'La descripción es clara y tiene rigor académico',
-                    'Se especificó correctamente el docente involucrado'
-                  ].map((txt, i) => (
-                    <label key={i} className="flex gap-3 items-start cursor-pointer group">
-                      <input type="checkbox" className="mt-1 accent-yellow-600" required />
-                      <span className="text-sm" style={{ color: 'var(--secondary-foreground)' }}>{txt}</span>
-                    </label>
+                    { key: 'copyright', label: 'El contenido no infringe derechos de autor' },
+                    { key: 'resolution', label: 'Las imágenes cumplen con la resolución mínima' },
+                    { key: 'consent', label: 'Se incluye el consentimiento de las personas identificables' },
+                    { key: 'description', label: 'La descripción es clara y tiene rigor académico' },
+                    { key: 'teacher', label: 'Se especificó correctamente el docente involucrado' },
+                  ].map(item => (
+                    <Checkbox
+                      key={item.key}
+                      checked={checklist[item.key as keyof typeof checklist]}
+                      onChange={() => setChecklist(c => ({ ...c, [item.key]: !c[item.key as keyof typeof checklist] }))}
+                      label={item.label}
+                    />
                   ))}
                 </div>
+                {!allChecked && (
+                  <div className="text-xs px-3 py-2 rounded mt-4" style={{ background: 'rgba(249,115,22,0.06)', color: 'var(--status-pending, #fb923c)', border: '1px solid rgba(249,115,22,0.15)' }}>
+                    Debes marcar todos los ítems del checklist para continuar.
+                  </div>
+                )}
               </div>
             )}
 
@@ -406,10 +398,10 @@ export function EstContribuir({ navigate, onSubmit }: ContribuirProps) {
 
             <div className="flex gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <button type="button" onClick={() => step > 1 ? setStep(step - 1) : navigate('est-dashboard')}
-                className="btn-outline-gold px-6 py-2.5 rounded text-sm">
+                className="btn-outline-primary px-6 py-2.5 rounded text-sm">
                 {step > 1 ? '← Anterior' : 'Cancelar'}
               </button>
-              <button type="submit" className="btn-gold px-8 py-2.5 rounded font-semibold text-sm flex-1">
+              <button type="submit" className="btn-primary px-8 py-2.5 rounded font-semibold text-sm flex-1">
                 {step < 4 ? 'Siguiente paso →' : 'Confirmar y Enviar'}
               </button>
             </div>

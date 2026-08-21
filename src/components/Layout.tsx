@@ -51,7 +51,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
     { label: 'Hall de la Fama', page: 'hall-fama' },
   ];
 
-  const roleLinks: Record<string, { label: string; page: Page }[]> = {
+  const roleLinks: Record<string, { label: string; page: Page; icon?: string }[]> = {
     estudiante: [
       { label: 'Mi Espacio', page: 'est-dashboard' },
       { label: 'Favoritos', page: 'est-favoritos' },
@@ -59,7 +59,6 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
     ],
     docente: [
       { label: 'Mi Espacio', page: 'doc-dashboard' },
-      { label: 'Notificaciones', page: 'doc-notificaciones' },
     ],
     admin: [
       { label: 'Dashboard', page: 'admin-dashboard' },
@@ -117,9 +116,16 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
             <button
               key={l.page}
               onClick={() => navigate(l.page)}
-              className="px-3 py-1.5 text-sm rounded transition-colors"
+              className="px-3 py-1.5 text-sm rounded transition-colors flex items-center gap-1.5"
               style={{ color: currentPage === l.page ? '#d32f2f' : 'var(--secondary-foreground)', background: currentPage === l.page ? 'rgba(211, 47, 47,0.08)' : 'transparent' }}
             >
+              {l.icon && <span className="relative">
+                {l.icon}
+                {l.page === 'doc-notificaciones' && (
+                  <span className="absolute -top-1.5 -right-2 text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full"
+                    style={{ background: '#d32f2f', color: '#fff', fontSize: '9px' }}>3</span>
+                )}
+              </span>}
               {l.label}
             </button>
           ))}
@@ -138,7 +144,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
               </span>
               <button
                 onClick={onLogout}
-                className="text-xs px-3 py-1.5 rounded btn-outline-gold"
+                className="text-xs px-3 py-1.5 rounded btn-outline-primary"
               >
                 Salir
               </button>
@@ -146,7 +152,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
           ) : (
             <button
               onClick={() => navigate('login')}
-              className="text-sm px-4 py-1.5 rounded btn-gold btn-float"
+              className="text-sm px-4 py-1.5 rounded btn-primary btn-float"
             >
               Ingresar
             </button>
@@ -170,14 +176,14 @@ export function Footer({ navigate }: FooterProps) {
           <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
             Museo Digital Interactivo del Programa de Ingeniería de Sistemas — Universidad Libre, Colombia.
           </p>
-          <p className="text-xs mt-3 font-mono" style={{ color: 'var(--muted-foreground)' }}>© 2024 Universidad Libre · Todos los derechos reservados</p>
+          <p className="text-xs mt-3 font-mono" style={{ color: 'var(--muted-foreground)' }}>© 2025 Universidad Libre · Todos los derechos reservados</p>
         </div>
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--muted-foreground)' }}>Explorar</div>
           <div className="flex flex-col gap-1.5">
             {(['explorar', 'buscar', 'hall-fama'] as Page[]).map((p, i) => (
               <button key={p} onClick={() => navigate(p)}
-                className="text-sm text-left w-fit transition-colors hover:text-yellow-400"
+                className="text-sm text-left w-fit transition-colors hover:text-primary"
                 style={{ color: 'var(--secondary-foreground)' }}>
                 {['Colecciones', 'Buscador', 'Hall de la Fama'][i]}
               </button>
@@ -205,7 +211,7 @@ interface SidebarProps {
 }
 
 export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) {
-  const links: Record<string, { label: string; page: Page; icon: string }[]> = {
+  const links: Record<string, { label: string; page: Page; icon: string; badge?: number }[]> = {
     estudiante: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
@@ -214,7 +220,6 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
     docente: [
       { label: 'Mi Dashboard', page: 'doc-dashboard', icon: '⊞' },
       { label: 'Registrar Evidencia', page: 'doc-wizard', icon: '✎' },
-      { label: 'Notificaciones', page: 'doc-notificaciones', icon: '🔔' },
     ],
     admin: [
       { label: 'Dashboard', page: 'admin-dashboard', icon: '⊞' },
@@ -245,7 +250,13 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
             }}
           >
             <span>{l.icon}</span>
-            <span>{l.label}</span>
+            <span className="flex-1">{l.label}</span>
+            {l.badge && l.badge > 0 && (
+              <span className="text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full"
+                style={{ background: '#d32f2f', color: '#fff', fontSize: '10px' }}>
+                {l.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>

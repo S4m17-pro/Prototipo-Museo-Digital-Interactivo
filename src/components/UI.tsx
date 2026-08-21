@@ -144,3 +144,65 @@ export function TagList({ tags }: { tags: string[] }) {
     </div>
   );
 }
+
+// Step indicator (reusable for wizards)
+interface StepIndicatorProps {
+  steps: string[];
+  currentStep: number;
+  completedStep?: number;
+}
+
+export function StepIndicator({ steps, currentStep, completedStep }: StepIndicatorProps) {
+  return (
+    <div className="flex items-center gap-2 mb-8">
+      {steps.map((label, i) => {
+        const num = i + 1;
+        const isCompleted = completedStep !== undefined ? completedStep > num : currentStep > num;
+        const isActive = currentStep >= num;
+        return (
+          <div key={num} className="flex items-center gap-2 flex-1">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all"
+              style={{
+                background: isCompleted ? '#22c55e' : isActive ? 'var(--primary)' : 'rgba(255,255,255,0.06)',
+                color: isActive ? 'var(--background)' : 'var(--muted-foreground)',
+                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.1)',
+              }}>
+              {isCompleted ? '✓' : num}
+            </div>
+            <span className="text-xs hidden md:inline" style={{ color: isActive ? 'var(--secondary-foreground)' : 'var(--muted-foreground)' }}>
+              {label}
+            </span>
+            {num < steps.length && (
+              <div className="h-px flex-1 mx-2" style={{ background: isCompleted ? '#22c55e' : isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)' }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Checkbox (unified)
+interface CheckboxProps {
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+}
+
+export function Checkbox({ checked, onChange, label }: CheckboxProps) {
+  return (
+    <label className="flex items-start gap-3 cursor-pointer group">
+      <div
+        className="w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center transition-all"
+        style={{
+          background: checked ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+          border: `1px solid ${checked ? 'var(--primary)' : 'rgba(255,255,255,0.15)'}`,
+        }}
+        onClick={onChange}
+      >
+        {checked && <span className="text-xs text-black font-bold">✓</span>}
+      </div>
+      <span className="text-sm" style={{ color: 'var(--secondary-foreground)' }}>{label}</span>
+    </label>
+  );
+}

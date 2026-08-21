@@ -3,7 +3,7 @@ import type { Page, Role } from './data';
 import { Header, Footer } from './components/Layout';
 
 // Public pages
-import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage } from './pages/Public';
+import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage } from './pages/Public';
 // Auth pages
 import { LoginPage, TwoFAPage, RegistroPage } from './pages/Auth';
 // Student pages
@@ -101,6 +101,8 @@ export default function App() {
         );
       case 'hall-fama':
         return <HallFamaPage navigate={navigate} />;
+      case 'semilleros':
+        return <SemillerosPage navigate={navigate} />;
 
       // ── AUTH ──
       case 'login':
@@ -155,7 +157,7 @@ export default function App() {
       {registroSuccess && currentPage === 'login' && (
         <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex items-center gap-3 px-4 py-3 rounded text-sm"
-            style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: '#4ade80' }}>
+            style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--status-published, #22c55e)' }}>
             <span>✓</span>
             <span>Cuenta creada. Esperando aprobación del administrador. Puedes ingresar una vez aprobada.</span>
             <button onClick={() => setRegistroSuccess(false)} className="ml-auto text-xs opacity-60 hover:opacity-100">✕</button>
