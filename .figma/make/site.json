@@ -1,0 +1,10 @@
+{
+  "description": "Explore and contribute to a digital museum showcasing university history, achievements, and research, with tailored experiences for visitors, students, and educators.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
