@@ -9,6 +9,22 @@ interface NavProps {
   onToggleTheme: () => void;
 }
 
+function SearchButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Buscar"
+      title="Buscar"
+      className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 flex-shrink-0"
+    >
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="10" cy="10" r="6.5" />
+        <line x1="19" y1="19" x2="14.5" y2="14.5" />
+      </svg>
+    </button>
+  );
+}
+
 function ThemeToggle({ theme, onToggle }: { theme: 'dark' | 'light'; onToggle: () => void }) {
   const isDark = theme === 'dark';
   return (
@@ -47,7 +63,6 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
 
   const publicLinks: { label: string; page: Page }[] = [
     { label: 'Explorar', page: 'explorar' },
-    { label: 'Buscar', page: 'buscar' },
     { label: 'Hall de la Fama', page: 'hall-fama' },
   ];
 
@@ -133,7 +148,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
 
         {/* Auth section */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <SearchButton onClick={() => navigate('buscar')} />
           {isAuth ? (
             <div className="flex items-center gap-2">
               <span className="hidden sm:flex items-center gap-1.5">
@@ -157,6 +172,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
               Ingresar
             </button>
           )}
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
       </div>
     </header>
