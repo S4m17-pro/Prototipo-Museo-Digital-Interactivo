@@ -1,4 +1,17 @@
 import type { Page, Role } from '../data';
+import { contentQueue } from '../data';
+
+type SidebarLink = { label: string; page: Page; icon: string; badge?: number };
+
+function getAdminNavLinks(): SidebarLink[] {
+  const pendingCount = contentQueue.filter(i => i.status === 'pendiente').length;
+  return [
+    { label: 'Dashboard', page: 'admin-dashboard', icon: '⊞' },
+    { label: 'Cola de Contenido', page: 'admin-cola', icon: '📋', badge: pendingCount },
+    { label: 'Usuarios', page: 'admin-usuarios', icon: '👥' },
+    { label: 'Registros Generales', page: 'admin-registros', icon: '🗃' },
+  ];
+}
 
 interface NavProps {
   currentPage: Page;
@@ -74,12 +87,6 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
     ],
     docente: [
       { label: 'Mi Espacio', page: 'doc-dashboard' },
-    ],
-    admin: [
-      { label: 'Dashboard', page: 'admin-dashboard' },
-      { label: 'Usuarios', page: 'admin-usuarios' },
-      { label: 'Cola de Contenido', page: 'admin-cola' },
-      { label: 'Registros', page: 'admin-registros' },
     ],
     egresado: [
       { label: 'Mi Espacio', page: 'est-dashboard' },
@@ -235,7 +242,7 @@ interface SidebarProps {
 }
 
 export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) {
-  const links: Record<string, { label: string; page: Page; icon: string; badge?: number }[]> = {
+  const links: Record<string, SidebarLink[]> = {
     estudiante: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
@@ -245,12 +252,7 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
       { label: 'Mi Dashboard', page: 'doc-dashboard', icon: '⊞' },
       { label: 'Registrar Evidencia', page: 'doc-wizard', icon: '✎' },
     ],
-    admin: [
-      { label: 'Dashboard', page: 'admin-dashboard', icon: '⊞' },
-      { label: 'Usuarios', page: 'admin-usuarios', icon: '👥' },
-      { label: 'Cola de Contenido', page: 'admin-cola', icon: '📋' },
-      { label: 'Registros Generales', page: 'admin-registros', icon: '🗃' },
-    ],
+    admin: getAdminNavLinks(),
     egresado: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
@@ -259,7 +261,7 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
   };
 
   return (
-    <aside className="w-52 flex-shrink-0 hidden lg:block">
+    <aside className="w-52 flex-shrink-0 hidden md:block">
       <div style={{ background: '#0f0f0d', border: '1px solid rgba(211, 47, 47,0.12)' }} className="rounded p-3 sticky top-20">
         <div className="text-xs font-semibold uppercase tracking-widest mb-3 px-2" style={{ color: 'var(--muted-foreground)' }}>Menú</div>
         {(links[role] || []).map(l => (
