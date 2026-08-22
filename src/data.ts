@@ -2,7 +2,7 @@ export type Status = 'publicado' | 'pendiente' | 'institucional' | 'devuelto';
 export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado';
 
 export type Page =
-  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros'
+  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso'
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
@@ -60,6 +60,14 @@ export interface User {
   status: 'activo' | 'inactivo' | 'pendiente';
   joinDate: string;
   contributions: number;
+  points?: number;
+  badgeIds?: string[];
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  icon: string;
 }
 
 export const collections: Collection[] = [
@@ -254,15 +262,41 @@ export const hallMembers: HallMember[] = [
   },
 ];
 
+export const badges: Badge[] = [
+  { id: 'primer-paso', name: 'Primer Paso', icon: '🏛️' },
+  { id: 'explorador', name: 'Explorador', icon: '🔍' },
+  { id: 'comentarista', name: 'Comentarista', icon: '💬' },
+  { id: 'favoritos', name: 'Favoritos', icon: '⭐' },
+  { id: 'lector-avido', name: 'Lector Ávido', icon: '📊' },
+  { id: 'punteria', name: 'Puntería', icon: '🎯' },
+  { id: 'colaborador', name: 'Colaborador', icon: '🤝' },
+  { id: 'campeon', name: 'Campeón', icon: '🏆' },
+  { id: 'critica-de-arte', name: 'Crítica de Arte', icon: '🎨' },
+  { id: 'enciclopedia', name: 'Enciclopedia', icon: '📚' },
+  { id: 'embajador', name: 'Embajador', icon: '📣' },
+  { id: 'global', name: 'Global', icon: '🌐' },
+];
+
+export function getLevelInfo(points: number) {
+  const POINTS_PER_LEVEL = 500;
+  const MAX_LEVEL = 20;
+  const level = Math.min(MAX_LEVEL, Math.floor(points / POINTS_PER_LEVEL) + 1);
+  const pointsIntoLevel = points - (level - 1) * POINTS_PER_LEVEL;
+  const pointsForNextLevel = POINTS_PER_LEVEL;
+  const progressPct = level >= MAX_LEVEL ? 100 : (pointsIntoLevel / pointsForNextLevel) * 100;
+  return { level, pointsIntoLevel, pointsForNextLevel, progressPct, maxLevel: MAX_LEVEL };
+}
+
 export const users: User[] = [
-  { id: '1', name: 'Ana Lucía Bermúdez', email: 'ana.bermudez@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-08-15', contributions: 4 },
-  { id: '2', name: 'Dr. Hernando Casas', email: 'h.casas@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2022-02-01', contributions: 18 },
-  { id: '3', name: 'Carlos Peña Vargas', email: 'c.pena@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2024-01-10', contributions: 1 },
-  { id: '4', name: 'Dra. Paola Jiménez', email: 'p.jimenez@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2021-07-20', contributions: 12 },
-  { id: '5', name: 'Miguel Torres Soto', email: 'm.torres@unilibre.edu.co', role: 'estudiante', status: 'pendiente', joinDate: '2024-06-01', contributions: 0 },
-  { id: '6', name: 'Fernanda Rincón', email: 'f.rincon@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-09-01', contributions: 2 },
-  { id: '7', name: 'Prof. Luis Ángel Castro', email: 'l.castro@unilibre.edu.co', role: 'docente', status: 'inactivo', joinDate: '2020-01-15', contributions: 7 },
+  { id: '1', name: 'Ana Lucía Bermúdez', email: 'ana.bermudez@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-08-15', contributions: 4, points: 3240, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria'] },
+  { id: '2', name: 'Dr. Hernando Casas', email: 'h.casas@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2022-02-01', contributions: 18, points: 7210, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon'] },
+  { id: '3', name: 'Carlos Peña Vargas', email: 'c.pena@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2024-01-10', contributions: 1, points: 6890, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador'] },
+  { id: '4', name: 'Dra. Paola Jiménez', email: 'p.jimenez@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2021-07-20', contributions: 12, points: 2150, badgeIds: ['primer-paso', 'explorador', 'comentarista'] },
+  { id: '5', name: 'Miguel Torres Soto', email: 'm.torres@unilibre.edu.co', role: 'estudiante', status: 'pendiente', joinDate: '2024-06-01', contributions: 0, points: 0, badgeIds: [] },
+  { id: '6', name: 'Fernanda Rincón', email: 'f.rincon@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-09-01', contributions: 2, points: 1480, badgeIds: ['primer-paso', 'explorador'] },
+  { id: '7', name: 'Prof. Luis Ángel Castro', email: 'l.castro@unilibre.edu.co', role: 'docente', status: 'inactivo', joinDate: '2020-01-15', contributions: 7, points: 3960, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos'] },
   { id: '8', name: 'Admin Sistema', email: 'admin@unilibre.edu.co', role: 'admin', status: 'activo', joinDate: '2019-01-01', contributions: 0 },
+  { id: '9', name: 'Catalina Restrepo', email: 'egresado@unilibre.edu.co', role: 'egresado', status: 'activo', joinDate: '2018-11-20', contributions: 5, points: 8540, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon', 'critica-de-arte'] },
 ];
 
 export const contentQueue: ContentItem[] = [

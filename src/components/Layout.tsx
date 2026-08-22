@@ -151,6 +151,14 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
               {l.label}
             </button>
           ))}
+          {/* Gamificación: "Mi Progreso" para quien participa (Estudiante/Egresado/Docente), "Rankings" para el resto */}
+          <button
+            onClick={() => navigate('progreso')}
+            className="px-3 py-1.5 text-sm rounded transition-colors"
+            style={{ color: currentPage === 'progreso' ? '#d32f2f' : 'var(--secondary-foreground)', background: currentPage === 'progreso' ? 'rgba(211, 47, 47,0.08)' : 'transparent' }}
+          >
+            {(['estudiante', 'egresado', 'docente'] as Role[]).includes(role) ? 'Mi Progreso' : 'Rankings'}
+          </button>
         </nav>
 
         {/* Auth section */}
