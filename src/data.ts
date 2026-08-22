@@ -2,7 +2,7 @@ export type Status = 'publicado' | 'pendiente' | 'institucional' | 'devuelto';
 export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado';
 
 export type Page =
-  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso'
+  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil'
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
@@ -62,6 +62,11 @@ export interface User {
   contributions: number;
   points?: number;
   badgeIds?: string[];
+  researchGroupId?: string;
+  graduationYear?: number;
+  currentPosition?: string;
+  bio?: string;
+  photoUrl?: string;
 }
 
 export interface Badge {
@@ -139,7 +144,7 @@ export const contentItems: ContentItem[] = [
     id: '1',
     title: 'Sistema de Predicción de Deserción Estudiantil mediante Aprendizaje Automático',
     category: 'investigacion',
-    author: 'Dr. Hernando Casas Moreno',
+    author: 'Dr. Hernando Casas',
     date: '2024-03-15',
     status: 'publicado',
     description: 'Investigación que desarrolla un modelo predictivo con 94% de precisión para identificar estudiantes en riesgo de deserción en universidades colombianas, utilizando Random Forest y redes neuronales.',
@@ -288,16 +293,39 @@ export function getLevelInfo(points: number) {
 }
 
 export const users: User[] = [
-  { id: '1', name: 'Ana Lucía Bermúdez', email: 'ana.bermudez@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-08-15', contributions: 4, points: 3240, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria'] },
-  { id: '2', name: 'Dr. Hernando Casas', email: 'h.casas@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2022-02-01', contributions: 18, points: 7210, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon'] },
+  { id: '1', name: 'Ana Lucía Bermúdez', email: 'ana.bermudez@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-08-15', contributions: 4, points: 3240, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria'], researchGroupId: '1' },
+  { id: '2', name: 'Dr. Hernando Casas', email: 'h.casas@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2022-02-01', contributions: 18, points: 7210, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon'], researchGroupId: '1' },
   { id: '3', name: 'Carlos Peña Vargas', email: 'c.pena@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2024-01-10', contributions: 1, points: 6890, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador'] },
   { id: '4', name: 'Dra. Paola Jiménez', email: 'p.jimenez@unilibre.edu.co', role: 'docente', status: 'activo', joinDate: '2021-07-20', contributions: 12, points: 2150, badgeIds: ['primer-paso', 'explorador', 'comentarista'] },
   { id: '5', name: 'Miguel Torres Soto', email: 'm.torres@unilibre.edu.co', role: 'estudiante', status: 'pendiente', joinDate: '2024-06-01', contributions: 0, points: 0, badgeIds: [] },
   { id: '6', name: 'Fernanda Rincón', email: 'f.rincon@unilibre.edu.co', role: 'estudiante', status: 'activo', joinDate: '2023-09-01', contributions: 2, points: 1480, badgeIds: ['primer-paso', 'explorador'] },
   { id: '7', name: 'Prof. Luis Ángel Castro', email: 'l.castro@unilibre.edu.co', role: 'docente', status: 'inactivo', joinDate: '2020-01-15', contributions: 7, points: 3960, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos'] },
   { id: '8', name: 'Admin Sistema', email: 'admin@unilibre.edu.co', role: 'admin', status: 'activo', joinDate: '2019-01-01', contributions: 0 },
-  { id: '9', name: 'Catalina Restrepo', email: 'egresado@unilibre.edu.co', role: 'egresado', status: 'activo', joinDate: '2018-11-20', contributions: 5, points: 8540, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon', 'critica-de-arte'] },
+  { id: '9', name: 'Catalina Restrepo', email: 'egresado@unilibre.edu.co', role: 'egresado', status: 'activo', joinDate: '2018-11-20', contributions: 5, points: 8540, badgeIds: ['primer-paso', 'explorador', 'comentarista', 'favoritos', 'lector-avido', 'punteria', 'colaborador', 'campeon', 'critica-de-arte'], graduationYear: 2018, currentPosition: 'Directora de Innovación, sector fintech' },
 ];
+
+export function getDemoUserForRole(role: Role): User | undefined {
+  const emailByRole: Partial<Record<Role, string>> = {
+    estudiante: 'ana.bermudez@unilibre.edu.co',
+    egresado: 'egresado@unilibre.edu.co',
+    docente: 'h.casas@unilibre.edu.co',
+    admin: 'admin@unilibre.edu.co',
+  };
+  const email = emailByRole[role];
+  return email ? users.find(u => u.email === email) : undefined;
+}
+
+export function getContributionsFor(user: User): ContentItem[] {
+  const seen = new Set<string>();
+  const result: ContentItem[] = [];
+  for (const item of [...contentItems, ...contentQueue]) {
+    if ((item.author === user.name || item.submittedBy === user.name) && !seen.has(item.id)) {
+      seen.add(item.id);
+      result.push(item);
+    }
+  }
+  return result;
+}
 
 export const contentQueue: ContentItem[] = [
   {

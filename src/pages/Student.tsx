@@ -1,27 +1,24 @@
 import { useState } from 'react';
-import { contentItems, teacherOptions } from '../data';
-import type { Page } from '../data';
-import { ContentCard, StatusBadge, SectionHeader, StatCard, StepIndicator, Checkbox } from '../components/UI';
+import { contentItems, teacherOptions, getDemoUserForRole, getContributionsFor } from '../data';
+import type { Page, Role } from '../data';
+import { ContentCard, StatusBadge, SectionHeader, StatCard, StepIndicator, Checkbox, EmptyState } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
 interface Props {
   navigate: (page: Page, id?: string) => void;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
-  role?: string;
+  role?: Role;
 }
 
 // ── DASHBOARD ESTUDIANTE ─────────────────────────────────────────────────────
 
 export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props) {
   const [bannerDismissed, setBannerDismissed] = useState(false);
-  const badges = [
-    { icon: '🎓', name: 'Primer Contribuidor', earned: true, description: 'Registraste tu primera contribución' },
-    { icon: '💬', name: 'Voz Activa', earned: true, description: 'Publicaste 5 comentarios' },
-    { icon: '⭐', name: 'Coleccionista', earned: false, description: 'Guarda 10 piezas en favoritos' },
-    { icon: '🔬', name: 'Investigador', earned: false, description: 'Contribuye con una investigación' },
-    { icon: '🏆', name: 'Destacado', earned: false, description: 'Obtén 50 likes en una pieza' },
-  ];
+  const me = getDemoUserForRole(role);
+  const myContent = me ? getContributionsFor(me) : [];
+  const myPublished = myContent.filter(i => i.status === 'publicado' || i.status === 'institucional');
+  const myPending = myContent.filter(i => i.status === 'pendiente' || i.status === 'devuelto');
 
   const agenda = [
     { date: '28 Jun', title: 'Semillero de Investigación GISI', time: '10:00 AM', location: 'Sala 301' },
@@ -59,31 +56,10 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Contribuciones" value={4} sub="3 publicadas" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <StatCard label="Contribuciones" value={myContent.length} sub={`${myPublished.length} publicadas`} />
             <StatCard label="Favoritos" value={favorites.length || 7} sub="guardados" color="#3b82f6" />
             <StatCard label="Comentarios" value={12} sub="este semestre" color="#a855f7" />
-            <StatCard label="Insignias" value={2} sub="de 5" color="#f97316" />
-          </div>
-
-          {/* Badges */}
-          <div className="museum-card rounded p-5 mb-6">
-            <h3 className="font-serif font-semibold mb-4" style={{ color: 'var(--card-foreground)' }}>Insignias</h3>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {badges.map(b => (
-                <div key={b.name}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded text-center"
-                  style={{
-                    background: b.earned ? 'rgba(211, 47, 47,0.08)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${b.earned ? 'rgba(211, 47, 47,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                    opacity: b.earned ? 1 : 0.45,
-                  }}>
-                  <span className="text-2xl">{b.icon}</span>
-                  <span className="text-xs font-medium" style={{ color: b.earned ? '#d32f2f' : 'var(--muted-foreground)' }}>{b.name}</span>
-                  <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{b.description}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Contenido Reciente del Programa */}
@@ -117,11 +93,11 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
               </div>
             </div>
 
-            {/* Recent contributions */}
+            {/* Contribuciones que necesitan atención */}
             <div className="museum-card rounded p-5">
-              <h3 className="font-serif font-semibold mb-4" style={{ color: 'var(--card-foreground)' }}>Mis Contribuciones</h3>
+              <h3 className="font-serif font-semibold mb-4" style={{ color: 'var(--card-foreground)' }}>Necesitan tu Atención</h3>
               <div className="flex flex-col gap-3">
-                {contentItems.filter(i => i.submittedBy || i.id === '2').slice(0, 3).map(item => (
+                {myPending.length > 0 ? myPending.map(item => (
                   <div key={item.id} className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('detalle', item.id)}>
                     <img src={item.image} alt={item.title} className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -129,7 +105,9 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
                       <StatusBadge status={item.status} />
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <EmptyState message="No tienes contribuciones pendientes de revisión." icon="✓" />
+                )}
                 <button onClick={() => navigate('est-contribuir')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-1 w-full">
                   + Agregar nueva contribución
                 </button>

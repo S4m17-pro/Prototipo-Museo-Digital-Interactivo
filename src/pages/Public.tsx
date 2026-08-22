@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collections, timeline, contentItems, hallMembers, achievements, researchGroups } from '../data';
+import { collections, timeline, contentItems, hallMembers, achievements, researchGroups, users } from '../data';
 import type { Page } from '../data';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
 
@@ -458,6 +458,7 @@ interface DetalleProps {
 
 export function DetallePage({ navigate, itemId, role, isFavorite, onToggleFavorite }: DetalleProps) {
   const item = contentItems.find(i => i.id === itemId) || contentItems[0];
+  const authorUser = users.find(u => u.name === item.author && u.role !== 'admin');
   const related = contentItems.filter(i => i.id !== item.id && i.category === item.category).slice(0, 3);
   const [comment, setComment] = useState('');
   const [copied, setCopied] = useState(false);
@@ -507,14 +508,29 @@ export function DetallePage({ navigate, itemId, role, isFavorite, onToggleFavori
           </h1>
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold"
-              style={{ background: 'rgba(211, 47, 47,0.15)', color: '#d32f2f' }}>
-              {item.author[0]}
-            </div>
-            <div>
-              <div className="text-sm font-medium" style={{ color: 'var(--card-foreground)' }}>{item.author}</div>
-              <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Autor</div>
-            </div>
+            {authorUser ? (
+              <button onClick={() => navigate('perfil', authorUser.id)} className="flex items-center gap-3 hover:opacity-80 transition-opacity text-left">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold flex-shrink-0"
+                  style={{ background: 'rgba(211, 47, 47,0.15)', color: '#d32f2f' }}>
+                  {item.author[0]}
+                </div>
+                <div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--card-foreground)' }}>{item.author}</div>
+                  <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Autor</div>
+                </div>
+              </button>
+            ) : (
+              <>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold"
+                  style={{ background: 'rgba(211, 47, 47,0.15)', color: '#d32f2f' }}>
+                  {item.author[0]}
+                </div>
+                <div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--card-foreground)' }}>{item.author}</div>
+                  <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Autor</div>
+                </div>
+              </>
+            )}
             {role !== 'visitante' && (
               <button onClick={() => onToggleFavorite(item.id)}
                 className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded text-sm btn-outline-primary"

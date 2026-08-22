@@ -1,6 +1,7 @@
 import type { Page, Role, User } from '../data';
-import { users, badges, getLevelInfo } from '../data';
+import { users, badges, getLevelInfo, getDemoUserForRole } from '../data';
 import { SectionHeader } from '../components/UI';
+import { DashboardSidebar } from '../components/Layout';
 
 interface ProgresoProps {
   role: Role;
@@ -8,14 +9,6 @@ interface ProgresoProps {
 }
 
 const PARTICIPANT_ROLES: Role[] = ['estudiante', 'egresado', 'docente'];
-
-// Persona demo fija por rol — misma convención que ya usan EstDashboard/DocDashboard
-// (ej. "Bienvenida, Ana Lucía", "Buenos días, Dr. Casas").
-const DEMO_EMAIL_BY_ROLE: Partial<Record<Role, string>> = {
-  estudiante: 'ana.bermudez@unilibre.edu.co',
-  egresado: 'egresado@unilibre.edu.co',
-  docente: 'h.casas@unilibre.edu.co',
-};
 
 const ROLE_LABEL: Record<Role, string> = {
   visitante: 'Visitante',
@@ -27,9 +20,9 @@ const ROLE_LABEL: Record<Role, string> = {
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-export function ProgresoPage({ role }: ProgresoProps) {
+export function ProgresoPage({ role, navigate }: ProgresoProps) {
   const isParticipant = PARTICIPANT_ROLES.includes(role);
-  const me = isParticipant ? users.find(u => u.email === DEMO_EMAIL_BY_ROLE[role]) : undefined;
+  const me = isParticipant ? getDemoUserForRole(role) : undefined;
 
   // Solo Estudiante/Egresado/Docente acumulan puntos y pueden aparecer aquí;
   // Admin queda excluido por construcción (FR-010), no por una validación aparte.
@@ -38,56 +31,66 @@ export function ProgresoPage({ role }: ProgresoProps) {
     .sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
     .slice(0, 10);
 
-  return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-10">
-      {isParticipant && me ? (
-        <SectionHeader label="Gamificación" title="Mi Progreso" subtitle="Tu avance dentro del Museo Digital Interactivo." />
-      ) : (
-        <SectionHeader label="Gamificación" title="Rankings" subtitle="Participación de estudiantes, egresados y docentes en el museo." />
-      )}
-
-      {isParticipant && me && (
-        <ProgresoPersonal me={me} />
-      )}
-
-      <div className="museum-card rounded overflow-hidden">
-        <div className="px-5 pt-5">
-          <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Ranking de Participación · Top 10</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm mt-4">
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(211, 47, 47,0.15)' }}>
-                {['#', 'Usuario', 'Rol', 'Puntos'].map(h => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--muted-foreground)' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rankingEntries.map((u, i) => (
-                <tr key={u.id} style={{ borderBottom: i < rankingEntries.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                  <td className="px-5 py-3 text-base">{MEDALS[i] ?? i + 1}</td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0"
-                        style={{ background: 'rgba(211, 47, 47,0.1)', color: '#d32f2f' }}>
-                        {u.name[0]}
-                      </div>
-                      <span style={{ color: 'var(--secondary-foreground)' }}>{u.name}{me?.id === u.id ? ' (Tú)' : ''}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className="text-xs px-2 py-0.5 rounded font-mono" style={{ background: 'rgba(211, 47, 47,0.08)', color: '#d32f2f' }}>
-                      {ROLE_LABEL[u.role]}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 font-mono" style={{ color: 'var(--secondary-foreground)' }}>{(u.points ?? 0).toLocaleString()}</td>
-                </tr>
+  const ranking = (
+    <div className="museum-card rounded overflow-hidden">
+      <div className="px-5 pt-5">
+        <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Ranking de Participación · Top 10</h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm mt-4">
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(211, 47, 47,0.15)' }}>
+              {['#', 'Usuario', 'Rol', 'Puntos'].map(h => (
+                <th key={h} className="px-5 py-3 text-left text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--muted-foreground)' }}>{h}</th>
               ))}
-            </tbody>
-          </table>
+            </tr>
+          </thead>
+          <tbody>
+            {rankingEntries.map((u, i) => (
+              <tr key={u.id} style={{ borderBottom: i < rankingEntries.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                <td className="px-5 py-3 text-base">{MEDALS[i] ?? i + 1}</td>
+                <td className="px-5 py-3">
+                  <button onClick={() => navigate('perfil', u.id)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity text-left">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0"
+                      style={{ background: 'rgba(211, 47, 47,0.1)', color: '#d32f2f' }}>
+                      {u.name[0]}
+                    </div>
+                    <span style={{ color: 'var(--secondary-foreground)' }}>{u.name}{me?.id === u.id ? ' (Tú)' : ''}</span>
+                  </button>
+                </td>
+                <td className="px-5 py-3">
+                  <span className="text-xs px-2 py-0.5 rounded font-mono" style={{ background: 'rgba(211, 47, 47,0.08)', color: '#d32f2f' }}>
+                    {ROLE_LABEL[u.role]}
+                  </span>
+                </td>
+                <td className="px-5 py-3 font-mono" style={{ color: 'var(--secondary-foreground)' }}>{(u.points ?? 0).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  if (isParticipant && me) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+        <div className="flex gap-8">
+          <DashboardSidebar role={role} currentPage="progreso" navigate={navigate} />
+          <div className="flex-1 min-w-0">
+            <SectionHeader label="Gamificación" title="Progreso" subtitle="Tu avance dentro del Museo Digital Interactivo." />
+            <ProgresoPersonal me={me} />
+            {ranking}
+          </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 md:px-8 py-10">
+      <SectionHeader label="Gamificación" title="Rankings" subtitle="Participación de estudiantes, egresados y docentes en el museo." />
+      {ranking}
     </div>
   );
 }
