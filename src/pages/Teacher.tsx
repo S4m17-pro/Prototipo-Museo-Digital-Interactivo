@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import type { Page } from '../data';
-import { contentItems } from '../data';
-import { StatusBadge, SectionHeader, StepIndicator, Checkbox } from '../components/UI';
+import { contentItems, getDemoUserForRole, getContributionsFor } from '../data';
+import { StatusBadge, SectionHeader, StepIndicator, Checkbox, EmptyState } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
 // ── DASHBOARD DOCENTE ────────────────────────────────────────────────────────
 
 export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string) => void }) {
   const [activeTab, setActiveTab] = useState<'mio' | 'involucrado'>('mio');
-  const myContent = contentItems.filter(i => i.author.includes('Casas') || i.author.includes('Jiménez'));
+  const me = getDemoUserForRole('docente');
+  const myAllContent = me ? getContributionsFor(me) : [];
+  const myContent = myAllContent.filter(i => i.status === 'pendiente' || i.status === 'devuelto');
   const involucradoContent = contentItems.filter(i => i.involvedTeacher?.includes('Casas'));
   const pendingInvolucrado = involucradoContent.filter(i => i.status === 'pendiente');
 
@@ -41,7 +43,7 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Contribuciones', value: 18, sub: 'Total registradas', color: '#d32f2f', icon: '📝', bg: 'rgba(211, 47, 47, 0.06)' },
+              { label: 'Contribuciones', value: myAllContent.length, sub: 'Total registradas', color: '#d32f2f', icon: '📝', bg: 'rgba(211, 47, 47, 0.06)' },
               { label: 'Publicadas', value: 15, sub: 'En el archivo', color: '#22c55e', icon: '✓', bg: 'rgba(34, 197, 94, 0.06)' },
               { label: 'En Revisión', value: 2, sub: 'Pendientes', color: '#f97316', icon: '⏳', bg: 'rgba(249, 115, 22, 0.06)' },
               { label: 'Estudiantes', value: 34, sub: 'Proyectos activos', color: '#a855f7', icon: '🎓', bg: 'rgba(168, 85, 247, 0.06)' },
@@ -96,10 +98,13 @@ export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string)
             {activeTab === 'mio' ? (
               <div className="museum-card rounded p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Mis Contribuciones</h3>
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>Necesitan tu Atención</h3>
                   <button onClick={() => navigate('doc-wizard')} className="text-xs btn-outline-primary px-2 py-1 rounded">+ Nueva</button>
                 </div>
                 <div className="flex flex-col gap-3">
+                  {myContent.length === 0 && (
+                    <EmptyState message="No tienes contribuciones pendientes de revisión." icon="✓" />
+                  )}
                   {myContent.slice(0, 3).map(item => (
                     <div key={item.id} className="flex items-center gap-3">
                       <img src={item.image} alt={item.title} className="w-10 h-10 object-cover rounded flex-shrink-0" />

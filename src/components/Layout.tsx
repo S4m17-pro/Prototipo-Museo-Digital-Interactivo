@@ -1,5 +1,5 @@
 import type { Page, Role } from '../data';
-import { contentQueue } from '../data';
+import { contentQueue, getDemoUserForRole } from '../data';
 
 type SidebarLink = { label: string; page: Page; icon: string; badge?: number };
 
@@ -102,6 +102,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
     admin: 'Admin',
     egresado: 'Egresado',
   };
+  const me = isAuth ? getDemoUserForRole(role) : undefined;
 
   return (
     <header style={{ background: 'rgba(10,10,10,0.97)', borderBottom: '1px solid rgba(211, 47, 47,0.15)' }}
@@ -151,13 +152,13 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
               {l.label}
             </button>
           ))}
-          {/* Gamificación: "Mi Progreso" para quien participa (Estudiante/Egresado/Docente), "Rankings" para el resto */}
+          {/* Ranking público — el acceso a "Progreso" personal vive en el sidebar de Mi Espacio */}
           <button
             onClick={() => navigate('progreso')}
             className="px-3 py-1.5 text-sm rounded transition-colors"
             style={{ color: currentPage === 'progreso' ? '#d32f2f' : 'var(--secondary-foreground)', background: currentPage === 'progreso' ? 'rgba(211, 47, 47,0.08)' : 'transparent' }}
           >
-            {(['estudiante', 'egresado', 'docente'] as Role[]).includes(role) ? 'Mi Progreso' : 'Rankings'}
+            Rankings
           </button>
         </nav>
 
@@ -166,12 +167,14 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
           <SearchButton onClick={() => navigate('buscar')} />
           {isAuth ? (
             <div className="flex items-center gap-2">
-              <span className="hidden sm:flex items-center gap-1.5">
-                <span className="text-xs px-2 py-0.5 rounded-full font-mono"
-                  style={{ background: 'rgba(211, 47, 47,0.12)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47,0.25)' }}>
-                  {roleBadge[role]}
-                </span>
-              </span>
+              <button
+                onClick={() => navigate('perfil')}
+                className="hidden sm:flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-mono transition-colors"
+                style={{ background: 'rgba(211, 47, 47,0.12)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47,0.25)' }}
+                title="Ver mi perfil"
+              >
+                {me?.name ?? roleBadge[role]}
+              </button>
               <button
                 onClick={onLogout}
                 className="text-xs px-3 py-1.5 rounded btn-outline-primary"
@@ -245,16 +248,19 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
   const links: Record<string, SidebarLink[]> = {
     estudiante: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
+      { label: 'Progreso', page: 'progreso', icon: '🏆' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
       { label: 'Contribuir', page: 'est-contribuir', icon: '↑' },
     ],
     docente: [
       { label: 'Mi Dashboard', page: 'doc-dashboard', icon: '⊞' },
+      { label: 'Progreso', page: 'progreso', icon: '🏆' },
       { label: 'Registrar Evidencia', page: 'doc-wizard', icon: '✎' },
     ],
     admin: getAdminNavLinks(),
     egresado: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
+      { label: 'Progreso', page: 'progreso', icon: '🏆' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
       { label: 'Contribuir', page: 'est-contribuir', icon: '↑' },
     ],

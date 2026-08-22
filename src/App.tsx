@@ -5,6 +5,7 @@ import { Header, Footer } from './components/Layout';
 // Public pages
 import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage } from './pages/Public';
 import { ProgresoPage } from './pages/Progreso';
+import { PerfilPage } from './pages/Perfil';
 // Auth pages
 import { LoginPage, TwoFAPage, RegistroPage } from './pages/Auth';
 // Student pages
@@ -23,13 +24,20 @@ export default function App() {
   const [pendingRole, setPendingRole] = useState<Role>('visitante');
   const [registroSuccess, setRegistroSuccess] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [profileUserId, setProfileUserId] = useState<string | undefined>(undefined);
+  const [profileEdits, setProfileEdits] = useState<Record<string, { bio?: string; photoUrl?: string }>>({});
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+
+  const updateProfile = (userId: string, edits: { bio?: string; photoUrl?: string }) => {
+    setProfileEdits(prev => ({ ...prev, [userId]: { ...prev[userId], ...edits } }));
+  };
 
   const navigate = (page: Page, id?: string) => {
     if (page === 'detalle' && id) setDetailId(id);
     if (page === 'admin-validacion' && id) setValidacionId(id);
     if (page === 'admin-confirmacion' && id) setValidacionId(id);
+    if (page === 'perfil') setProfileUserId(id);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -74,7 +82,7 @@ export default function App() {
   };
 
   const noFooterPages: Page[] = [
-    'login', '2fa', 'registro',
+    'login', '2fa', 'registro', 'perfil',
     'est-dashboard', 'est-contribuir', 'est-favoritos',
     'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
     'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
@@ -106,6 +114,8 @@ export default function App() {
         return <SemillerosPage navigate={navigate} />;
       case 'progreso':
         return <ProgresoPage role={role} navigate={navigate} />;
+      case 'perfil':
+        return <PerfilPage key={profileUserId ?? 'self'} role={role} navigate={navigate} viewUserId={profileUserId} profileEdits={profileEdits} onUpdateProfile={updateProfile} />;
 
       // ── AUTH ──
       case 'login':
