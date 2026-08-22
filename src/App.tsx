@@ -4,6 +4,7 @@ import { Header, Footer } from './components/Layout';
 
 // Public pages
 import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage } from './pages/Public';
+import { ProgresoPage } from './pages/Progreso';
 // Auth pages
 import { LoginPage, TwoFAPage, RegistroPage } from './pages/Auth';
 // Student pages
@@ -103,6 +104,8 @@ export default function App() {
         return <HallFamaPage navigate={navigate} />;
       case 'semilleros':
         return <SemillerosPage navigate={navigate} />;
+      case 'progreso':
+        return <ProgresoPage role={role} navigate={navigate} />;
 
       // ── AUTH ──
       case 'login':
