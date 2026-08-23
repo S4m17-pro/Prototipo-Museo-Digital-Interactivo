@@ -3,7 +3,7 @@ import type { Page, Role } from './data';
 import { Header, Footer } from './components/Layout';
 
 // Public pages
-import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage } from './pages/Public';
+import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage, CalendarioPage } from './pages/Public';
 import { ProgresoPage } from './pages/Progreso';
 import { PerfilPage } from './pages/Perfil';
 // Auth pages
@@ -112,6 +112,8 @@ export default function App() {
         return <HallFamaPage navigate={navigate} />;
       case 'semilleros':
         return <SemillerosPage navigate={navigate} />;
+      case 'calendario':
+        return <CalendarioPage navigate={navigate} />;
       case 'progreso':
         return <ProgresoPage role={role} navigate={navigate} />;
       case 'perfil':

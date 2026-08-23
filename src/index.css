@@ -271,11 +271,6 @@ body {
 }
 .museum-input::placeholder { color: var(--muted-foreground); }
 
-/* Timeline line */
-.timeline-line {
-  background: linear-gradient(to bottom, transparent, rgba(211, 47, 47,0.4), transparent);
-}
-
 /* Section divider */
 .section-divider {
   border: none;

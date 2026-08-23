@@ -1,7 +1,117 @@
 import { useState, useEffect } from 'react';
-import { collections, timeline, contentItems, hallMembers, achievements, researchGroups, users } from '../data';
-import type { Page } from '../data';
+import { collections, timeline, contentItems, hallMembers, achievements, researchGroups, users, events } from '../data';
+import type { Page, TimelineEvent } from '../data';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
+
+// ── HERO TIMELINE (selector por década) ─────────────────────────────────────
+
+const typeColors: Record<string, string> = {
+  fundacion: '#d32f2f', logro: '#22c55e', evento: '#3b82f6', investigacion: '#a855f7'
+};
+
+const decadeGroups: { decade: number; events: TimelineEvent[] }[] = Object.entries(
+  timeline.reduce<Record<number, TimelineEvent[]>>((acc, ev) => {
+    const d = Math.floor(ev.year / 10) * 10;
+    (acc[d] ||= []).push(ev);
+    return acc;
+  }, {})
+)
+  .map(([decade, events]) => ({ decade: Number(decade), events }))
+  .sort((a, b) => a.decade - b.decade);
+
+function HeroTimeline({ navigate }: { navigate: (page: Page) => void }) {
+  const [active, setActive] = useState(0);
+  const [autoOn, setAutoOn] = useState(true);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (!autoOn || hovered) return;
+    const id = setInterval(() => setActive(a => (a + 1) % decadeGroups.length), 5000);
+    return () => clearInterval(id);
+  }, [autoOn, hovered]);
+
+  const group = decadeGroups[active];
+  const [main, ...rest] = group.events;
+
+  return (
+    <div
+      className="hidden lg:block"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="mb-4">
+        <div className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color: '#d32f2f' }}>Cronología</div>
+        <div className="text-sm font-serif font-semibold" style={{ color: 'var(--foreground)' }}>Medio siglo de hitos</div>
+      </div>
+
+      {/* Décadas */}
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {decadeGroups.map((g, i) => (
+          <button
+            key={g.decade}
+            onClick={() => { setActive(i); setAutoOn(false); }}
+            className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all ${i === active ? "" : "hover:border-[rgba(211,47,47,0.55)]"}`}
+            style={i === active
+              ? { background: '#d32f2f', color: '#ffffff', boxShadow: '0 2px 10px rgba(211,47,47,0.35)', border: '1px solid #d32f2f' }
+              : { background: 'transparent', color: 'var(--secondary-foreground)', border: '1px solid rgba(211,47,47,0.25)' }}
+          >
+            {"'"}{String(g.decade).slice(2)}0s
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido flotante de la década */}
+      <div key={active} className="animate-fadeInUp relative pl-6 min-h-[220px]">
+        {/* Línea decorativa vertical */}
+        <div className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full"
+          style={{ background: 'linear-gradient(to bottom, #d32f2f, rgba(211,47,47,0.05))' }} />
+
+        {/* Hito principal */}
+        <button onClick={() => navigate('explorar')} className="block w-full text-left group">
+          <span className="font-serif text-[64px] font-black leading-none text-primary-gradient block transition-transform duration-300 group-hover:translate-x-1">
+            {main.year}
+          </span>
+          <span className="inline-block text-[10px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider mt-2.5"
+            style={{ background: `${typeColors[main.type]}14`, color: typeColors[main.type], border: `1px solid ${typeColors[main.type]}30` }}>
+            {main.type.charAt(0).toUpperCase() + main.type.slice(1)}
+          </span>
+          <div className="font-serif text-lg font-bold mt-2 leading-snug transition-colors" style={{ color: 'var(--foreground)' }}>
+            {main.title}
+          </div>
+          <p className="text-sm leading-relaxed mt-1.5 max-w-md" style={{ color: 'var(--muted-foreground)' }}>
+            {main.description}
+          </p>
+        </button>
+
+        {/* Hitos secundarios */}
+        {rest.length > 0 && (
+          <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(211,47,47,0.12)' }}>
+            <div className="text-[10px] font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--muted-foreground)' }}>
+              También en esta década
+            </div>
+            <div className="flex flex-col gap-2">
+              {rest.map(ev => (
+                <button key={ev.year} onClick={() => navigate('explorar')}
+                  className="flex items-baseline gap-3 text-left w-full hover:opacity-70 transition-opacity">
+                  <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: typeColors[ev.type] }}>
+                    {ev.year}
+                  </span>
+                  <span className="text-xs truncate" style={{ color: 'var(--secondary-foreground)' }}>
+                    {ev.title}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <button onClick={() => navigate('explorar')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-4">
+        Ver línea completa →
+      </button>
+    </div>
+  );
+}
 
 // ── HOME ────────────────────────────────────────────────────────────────────
 
@@ -19,10 +129,6 @@ export function HomePage({ navigate, role }: HomeProps) {
   };
 
   const published = contentItems.filter(i => i.status === 'publicado' || i.status === 'institucional');
-
-  const typeColors: Record<string, string> = {
-    fundacion: '#d32f2f', logro: '#22c55e', evento: '#3b82f6', investigacion: '#a855f7'
-  };
 
   return (
     <div>
@@ -90,49 +196,8 @@ export function HomePage({ navigate, role }: HomeProps) {
               </div>
             </div>
 
-            {/* Right — Compact timeline */}
-            <div className="hidden lg:block">
-              <div className="mb-4">
-                <div className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color: '#d32f2f' }}>Cronología</div>
-                <div className="text-sm font-serif font-semibold" style={{ color: 'var(--foreground)' }}>Medio siglo de hitos</div>
-              </div>
-              <div className="relative pl-6">
-                {/* Vertical line */}
-                <div className="absolute left-[5px] top-1 bottom-1 w-px timeline-line" />
-                <div className="flex flex-col gap-0">
-                  {timeline.map((ev, i) => (
-                    <button
-                      key={ev.year}
-                      onClick={() => navigate('explorar')}
-                      className="relative flex items-start gap-4 py-3 text-left group hover:bg-white/[0.02] rounded-r px-2 -ml-2 transition-colors"
-                    >
-                      {/* Dot */}
-                      <div className="absolute left-[-19px] top-4 w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ background: typeColors[ev.type], boxShadow: `0 0 6px ${typeColors[ev.type]}50` }} />
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="font-mono text-xs font-bold" style={{ color: typeColors[ev.type] }}>{ev.year}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded font-mono"
-                            style={{ background: `${typeColors[ev.type]}12`, color: typeColors[ev.type] }}>
-                            {ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}
-                          </span>
-                        </div>
-                        <div className="text-sm font-serif font-semibold leading-tight group-hover:text-primary transition-colors" style={{ color: 'var(--card-foreground)' }}>
-                          {ev.title}
-                        </div>
-                        <p className="text-xs leading-relaxed mt-0.5 line-clamp-1" style={{ color: 'var(--muted-foreground)' }}>
-                          {ev.description}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => navigate('explorar')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-3">
-                  Ver línea completa →
-                </button>
-              </div>
-            </div>
+            {/* Right — Timeline por décadas */}
+            <HeroTimeline navigate={navigate} />
           </div>
         </div>
       </section>
@@ -254,7 +319,7 @@ export function HomePage({ navigate, role }: HomeProps) {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('explorar')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-4">
+            <button onClick={() => navigate('calendario')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-4">
               Ver todos los eventos →
             </button>
           </div>
@@ -835,6 +900,148 @@ export function SemillerosPage({ navigate }: { navigate: (page: Page) => void })
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CALENDARIO DE ACTIVIDADES ───────────────────────────────────────────────
+
+const eventTypeColors: Record<string, string> = {
+  conferencia: '#d32f2f', taller: '#3b82f6', graduacion: '#22c55e', cultural: '#a855f7'
+};
+
+/** Fecha local a ISO YYYY-MM-DD (evita desfase UTC de toISOString) */
+function isoOf(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export function CalendarioPage({ navigate }: { navigate: (page: Page) => void }) {
+  const now = new Date();
+  const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
+  const [selectedDate, setSelectedDate] = useState(isoOf(now));
+
+  const byDate: Record<string, typeof events> = {};
+  for (const ev of events) (byDate[ev.date] ||= []).push(ev);
+
+  // Celdas del mes (semanas de lunes a domingo), con días vecinos atenuados
+  const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
+  const lead = (new Date(view.y, view.m, 1).getDay() + 6) % 7;
+  const cells: { date: Date; dim: boolean }[] = [];
+  for (let i = lead; i > 0; i--) cells.push({ date: new Date(view.y, view.m, 1 - i), dim: true });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(view.y, view.m, d), dim: false });
+  let trail = 1;
+  while (cells.length % 7 !== 0) cells.push({ date: new Date(view.y, view.m + 1, trail++), dim: true });
+
+  const moveMonth = (delta: number) => setView(v => {
+    const d = new Date(v.y, v.m + delta, 1);
+    return { y: d.getFullYear(), m: d.getMonth() };
+  });
+
+  const dayEvents = byDate[selectedDate] ?? [];
+  const monthLabel = new Date(view.y, view.m, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  const dayLabel = new Date(`${selectedDate}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+      <SectionHeader label="Comunidad" title="Calendario de Actividades" subtitle="Conferencias, talleres y vida universitaria del programa, mes a mes." />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_330px] gap-6 items-start">
+        {/* Cuadrícula mensual */}
+        <div className="museum-card rounded-lg p-4 md:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => moveMonth(-1)}
+              className="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+              style={{ border: '1px solid rgba(211,47,47,0.25)', color: 'var(--secondary-foreground)' }} aria-label="Mes anterior">
+              ‹
+            </button>
+            <div className="font-serif text-lg font-bold capitalize" style={{ color: 'var(--foreground)' }}>{monthLabel}</div>
+            <button onClick={() => moveMonth(1)}
+              className="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+              style={{ border: '1px solid rgba(211,47,47,0.25)', color: 'var(--secondary-foreground)' }} aria-label="Mes siguiente">
+              ›
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => (
+              <div key={d} className="text-center text-[10px] font-mono uppercase tracking-wider py-1" style={{ color: 'var(--muted-foreground)' }}>{d}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((c, i) => {
+              const iso = isoOf(c.date);
+              const evs = byDate[iso] ?? [];
+              const isSelected = iso === selectedDate;
+              const isToday = iso === isoOf(now);
+              return (
+                <button key={i} onClick={() => setSelectedDate(iso)}
+                  className={`relative min-h-[52px] md:min-h-[62px] rounded-md p-1.5 text-left transition-all ${c.dim ? "opacity-30" : "hover:bg-white/[0.04]"}`}
+                  style={{
+                    background: isSelected ? 'rgba(211,47,47,0.14)' : 'transparent',
+                    border: isSelected ? '1px solid rgba(211,47,47,0.55)' : '1px solid transparent',
+                  }}>
+                  <span className={`text-xs font-mono ${isToday ? "font-bold" : ""}`} style={{ color: isToday ? '#d32f2f' : 'var(--card-foreground)' }}>
+                    {c.date.getDate()}
+                  </span>
+                  {evs.length > 0 && (
+                    <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5">
+                      {evs.slice(0, 3).map(ev => (
+                        <span key={ev.id} className="w-1.5 h-1.5 rounded-full" style={{ background: eventTypeColors[ev.type] }} />
+                      ))}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Columna derecha: leyenda + agenda del día */}
+        <div className="flex flex-col gap-5">
+          <div className="museum-card rounded-lg p-4">
+            <div className="text-[10px] font-mono uppercase tracking-widest mb-2.5" style={{ color: '#d32f2f' }}>Tipos de actividad</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {Object.entries(eventTypeColors).map(([t, c]) => (
+                <div key={t} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--secondary-foreground)' }}>
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c }} />
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="museum-card rounded-lg p-4">
+            <div className="text-sm font-serif font-bold mb-3 capitalize" style={{ color: 'var(--foreground)' }}>{dayLabel}</div>
+            {dayEvents.length === 0 ? (
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                Sin actividades programadas para este día. Selecciona un día con puntos de color en el calendario.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {dayEvents.map(ev => (
+                  <div key={ev.id} className="border-l-2 pl-3" style={{ borderColor: eventTypeColors[ev.type] }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs font-bold" style={{ color: eventTypeColors[ev.type] }}>{ev.time}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider"
+                        style={{ background: `${eventTypeColors[ev.type]}14`, color: eventTypeColors[ev.type], border: `1px solid ${eventTypeColors[ev.type]}30` }}>
+                        {ev.type}
+                      </span>
+                    </div>
+                    <div className="text-sm font-serif font-semibold leading-snug" style={{ color: 'var(--card-foreground)' }}>{ev.title}</div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>📍 {ev.location}</div>
+                    <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>{ev.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button onClick={() => navigate('explorar')} className="text-xs btn-outline-primary px-3 py-1.5 rounded self-start">
+            Ver archivo de eventos →
+          </button>
         </div>
       </div>
     </div>
