@@ -2,7 +2,7 @@ export type Status = 'publicado' | 'pendiente' | 'institucional' | 'devuelto';
 export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado';
 
 export type Page =
-  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil'
+  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil' | 'calendario'
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
@@ -137,6 +137,41 @@ export const timeline: TimelineEvent[] = [
   { year: 2019, title: 'Renovación Acreditación', description: 'Renovación de acreditación de alta calidad por 8 años, la máxima distinción.', type: 'logro' },
   { year: 2022, title: 'Laboratorio de IA y Datos', description: 'Inauguración del laboratorio de Inteligencia Artificial y Ciencia de Datos.', type: 'evento' },
   { year: 2024, title: '50 Años de Excelencia', description: 'Celebración del medio siglo de formación de ingenieros íntegros y competentes.', type: 'fundacion' },
+];
+
+// ── EVENTOS (agenda del calendario) ─────────────────────────────────────────
+
+export type EventType = 'conferencia' | 'taller' | 'graduacion' | 'cultural';
+
+export interface EventItem {
+  id: string;
+  title: string;
+  /** Fecha ISO YYYY-MM-DD */
+  date: string;
+  time: string;
+  location: string;
+  type: EventType;
+  description: string;
+}
+
+/** Fecha de hoy + n días, en formato ISO YYYY-MM-DD (seguro con zona horaria local) */
+function fechaRelativa(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export const events: EventItem[] = [
+  { id: 'e1', title: 'Conferencia: IA Generativa en la Ingeniería', date: fechaRelativa(3), time: '10:00', location: 'Auditorio Principal', type: 'conferencia', description: 'Charla magistral sobre el impacto de los modelos generativos en la práctica profesional de la ingeniería de sistemas.' },
+  { id: 'e2', title: 'Taller de Ciberseguridad Ofensiva', date: fechaRelativa(6), time: '14:00', location: 'Laboratorio de Redes', type: 'taller', description: 'Sesión práctica de ethical hacking dirigida a estudiantes de séptimo y octavo semestre.' },
+  { id: 'e3', title: 'Feria de Empresas y Prácticas', date: fechaRelativa(9), time: '09:00', location: 'Cancha Central', type: 'cultural', description: 'Encuentro con más de 20 empresas aliadas que ofrecen prácticas, monitorias y contratos de aprendizaje.' },
+  { id: 'e4', title: 'Simposio de Investigación GISI', date: fechaRelativa(13), time: '08:00', location: 'Auditorio Principal', type: 'conferencia', description: 'Presentación de los proyectos activos del grupo GISI y convocatoria a nuevos semillistas.' },
+  { id: 'e5', title: 'Taller: Docker y Contenedores', date: fechaRelativa(16), time: '15:00', location: 'Laboratorio de Software', type: 'taller', description: 'Fundamentos de containerización y despliegue de aplicaciones con docker-compose.' },
+  { id: 'e6', title: 'Grado Simbólico Promoción 2026-1', date: fechaRelativa(21), time: '17:00', location: 'Plaza de la Cultura', type: 'graduacion', description: 'Ceremonia protocolar de grado para la promoción de ingenieros de sistemas 2026-1.' },
+  { id: 'e7', title: 'Noche de Talentos Unilibrista', date: fechaRelativa(25), time: '19:00', location: 'Teatro La Castellana', type: 'cultural', description: 'Presentaciones artísticas de estudiantes y docentes en marco de bienestar universitario.' },
+  { id: 'e8', title: 'Conferencia: Nube Híbrida Empresarial', date: fechaRelativa(28), time: '11:00', location: 'Auditorio El Bosque', type: 'conferencia', description: 'Arquitecturas multi-nube y mejores prácticas de migración con invitados de la industria.' },
+  { id: 'e9', title: 'Hackathon Unilibre Data', date: fechaRelativa(33), time: '08:00', location: 'Bloque Tecnológico', type: 'taller', description: '24 horas de desarrollo de soluciones de datos abiertos con premios para los tres primeros equipos.' },
+  { id: 'e10', title: 'Torneo Deportivo Interfacultades', date: fechaRelativa(37), time: '09:00', location: 'Canchas Campus Candelaria', type: 'cultural', description: 'Fútbol, voleibol y baloncesto entre programas de la facultad de ingeniería.' },
 ];
 
 export const contentItems: ContentItem[] = [
