@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { collections, timeline, contentItems, hallMembers, achievements, researchGroups, users, events } from '../data';
 import type { Page, TimelineEvent } from '../data';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
@@ -354,6 +354,10 @@ export function HomePage({ navigate, role }: HomeProps) {
 
 export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string) => void }) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [pill, setPill] = useState<{ left: number; top: number; width: number; height: number; ready: boolean }>({
+    left: 0, top: 0, width: 0, height: 0, ready: false,
+  });
 
   const categories = [
     { id: null, label: 'Todo', icon: '📋', count: contentItems.length },
@@ -374,6 +378,21 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
   const visible = filtered.filter(i => i.status === 'publicado' || i.status === 'institucional');
 
   const activeLabel = categories.find(c => c.id === activeCategory)?.label || 'Todo';
+  const activeIdx = categories.findIndex(c => c.id === activeCategory);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = itemRefs.current[activeIdx];
+      if (!el) {
+        setPill(p => (p.ready ? { ...p, ready: false } : p));
+        return;
+      }
+      setPill({ left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight, ready: true });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeIdx]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
@@ -381,25 +400,41 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
 
       <div className="grid grid-cols-1 lg:grid-cols-[224px_1fr] gap-8">
         {/* Left — Category sidebar */}
-        <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
-          {categories.map(c => (
-            <button
-              key={String(c.id)}
-              onClick={() => setActiveCategory(c.id)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded text-sm font-medium transition-all whitespace-nowrap lg:whitespace-normal text-left w-auto lg:w-full"
-              style={{
-                background: activeCategory === c.id ? 'rgba(211, 47, 47,0.1)' : 'transparent',
-                color: activeCategory === c.id ? '#d32f2f' : 'var(--secondary-foreground)',
-                borderLeft: activeCategory === c.id ? '2px solid #d32f2f' : '2px solid transparent',
-              }}
-            >
-              <span className="text-base flex-shrink-0">{c.icon}</span>
-              <span className="flex-1 truncate">{c.label}</span>
-              <span className="text-xs font-mono flex-shrink-0" style={{ color: 'var(--muted-foreground)' }}>
-                {c.count}
-              </span>
-            </button>
-          ))}
+        <nav className="relative flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
+          <div
+            aria-hidden="true"
+            className="absolute rounded-lg pointer-events-none z-0"
+            style={{
+              transform: `translate(${pill.left}px, ${pill.top}px)`,
+              width: pill.width,
+              height: pill.height,
+              opacity: pill.ready && activeIdx >= 0 ? 1 : 0,
+              background: 'linear-gradient(135deg, #e53935, #b71c1c)',
+              boxShadow: '0 4px 16px rgba(211, 47, 47, 0.45)',
+              transition:
+                'transform .38s cubic-bezier(0.22, 0.61, 0.36, 1), width .38s cubic-bezier(0.22, 0.61, 0.36, 1), height .38s cubic-bezier(0.22, 0.61, 0.36, 1), opacity .25s ease .1s',
+            }}
+          />
+          {categories.map((c, i) => {
+            const isActive = i === activeIdx;
+            return (
+              <button
+                key={String(c.id)}
+                ref={el => {
+                  itemRefs.current[i] = el;
+                }}
+                onClick={() => setActiveCategory(c.id)}
+                className={`sb-item group relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap lg:whitespace-normal text-left w-auto lg:w-full ${isActive ? '' : 'hover:translate-x-1'}`}
+                style={{ color: isActive ? '#ffffff' : 'var(--secondary-foreground)', animationDelay: `${Math.min(i * 50, 400)}ms` }}
+              >
+                <span className={`sb-chip ${isActive ? 'sb-chip-on' : ''}`}>{c.icon}</span>
+                <span className="flex-1 truncate">{c.label}</span>
+                <span className="text-xs font-mono flex-shrink-0" style={{ color: isActive ? 'rgba(255,255,255,0.85)' : 'var(--muted-foreground)' }}>
+                  {c.count}
+                </span>
+              </button>
+            );
+          })}
         </nav>
 
         {/* Right — Content grid */}
@@ -408,22 +443,27 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
             <h3 className="font-serif font-semibold text-lg" style={{ color: 'var(--foreground)' }}>
               {activeLabel}
             </h3>
-            <span className="text-xs font-mono px-2 py-0.5 rounded"
+            <span key={`${activeCategory}-${visible.length}`} className="fade-up-delayed text-xs font-mono px-2 py-0.5 rounded"
               style={{ background: 'rgba(211, 47, 47,0.08)', color: '#d32f2f' }}>
               {visible.length} resultado{visible.length !== 1 ? 's' : ''}
             </span>
           </div>
 
           {visible.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {visible.map(item => (
-                <ContentCard key={item.id} item={item} navigate={navigate} />
+            <div key={String(activeCategory)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {visible.map((item, i) => (
+                <div key={item.id} className="fade-up-delayed h-full" style={{ animationDelay: `${Math.min(i * 50, 450)}ms` }}>
+                  <ContentCard item={item} navigate={navigate} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
-              <span className="text-4xl opacity-30">📂</span>
-              <p style={{ color: 'var(--muted-foreground)' }}>No hay contenido en esta categoría aún.</p>
+            <div className="museum-card rounded py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
+              <span className="empty-float text-5xl">📂</span>
+              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No hay contenido en esta categoría aún.</p>
+              <button onClick={() => setActiveCategory(null)} className="text-xs btn-outline-primary px-4 py-2 rounded mt-1">
+                Ver todas las colecciones
+              </button>
             </div>
           )}
         </div>

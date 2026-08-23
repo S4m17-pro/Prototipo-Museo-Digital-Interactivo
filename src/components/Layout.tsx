@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { Page, Role } from '../data';
 import { contentQueue, getDemoUserForRole } from '../data';
 import Logo from './Logo';
@@ -263,33 +264,105 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
       { label: 'Contribuir', page: 'est-contribuir', icon: '↑' },
     ],
   };
+  const items = links[role] || [];
+  const activeIdx = items.findIndex(l => l.page === currentPage);
+
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [pill, setPill] = useState<{ top: number; height: number; ready: boolean }>({ top: 0, height: 0, ready: false });
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = itemRefs.current[activeIdx];
+      if (!el) {
+        setPill(p => (p.ready ? { ...p, ready: false } : p));
+        return;
+      }
+      setPill({ top: el.offsetTop, height: el.offsetHeight, ready: true });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeIdx, role]);
 
   return (
-    <aside className="w-52 flex-shrink-0 hidden md:block">
-      <div style={{ background: '#0f0f0d', border: '1px solid rgba(211, 47, 47,0.12)' }} className="rounded p-3 sticky top-20">
-        <div className="text-xs font-semibold uppercase tracking-widest mb-3 px-2" style={{ color: 'var(--muted-foreground)' }}>Menú</div>
-        {(links[role] || []).map(l => (
-          <button
-            key={l.page}
-            onClick={() => navigate(l.page)}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded text-sm mb-0.5 text-left transition-all"
-            style={{
-              background: currentPage === l.page ? 'rgba(211, 47, 47,0.1)' : 'transparent',
-              borderLeft: currentPage === l.page ? '2px solid #d32f2f' : '2px solid transparent',
-              color: currentPage === l.page ? '#d32f2f' : 'var(--secondary-foreground)',
-            }}
-          >
-            <span>{l.icon}</span>
-            <span className="flex-1">{l.label}</span>
-            {l.badge && l.badge > 0 && (
-              <span className="text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full"
-                style={{ background: '#d32f2f', color: '#fff', fontSize: '10px' }}>
-                {l.badge}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-    </aside>
+    <>
+      <aside className="w-52 flex-shrink-0 hidden md:block">
+        <div style={{ background: '#0f0f0d', border: '1px solid rgba(211, 47, 47,0.12)' }} className="rounded p-3 sticky top-20">
+          <div className="text-xs font-semibold uppercase tracking-widest mb-3 px-2" style={{ color: 'var(--muted-foreground)' }}>Menú</div>
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className="absolute left-0 right-0 rounded-lg pointer-events-none"
+              style={{
+                transform: `translateY(${pill.top}px)`,
+                height: pill.height,
+                opacity: pill.ready && activeIdx >= 0 ? 1 : 0,
+                background: 'linear-gradient(135deg, #e53935, #b71c1c)',
+                boxShadow: '0 4px 16px rgba(211, 47, 47, 0.45)',
+                transition:
+                  'transform .38s cubic-bezier(0.22, 0.61, 0.36, 1), height .38s cubic-bezier(0.22, 0.61, 0.36, 1), opacity .25s ease .1s',
+              }}
+            />
+            {items.map((l, i) => {
+              const isActive = i === activeIdx;
+              return (
+                <button
+                  key={l.page}
+                  ref={el => {
+                    itemRefs.current[i] = el;
+                  }}
+                  onClick={() => navigate(l.page)}
+                  className={`sb-item group relative z-10 w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm mb-1 text-left transition-all duration-200 ${isActive ? '' : 'hover:translate-x-1'}`}
+                  style={{ color: isActive ? '#ffffff' : 'var(--secondary-foreground)', animationDelay: `${i * 60}ms` }}
+                >
+                  <span className={`sb-chip ${isActive ? 'sb-chip-on' : ''}`}>{l.icon}</span>
+                  <span className="flex-1 leading-tight">{l.label}</span>
+                  {l.badge != null && l.badge > 0 && (
+                    <span
+                      className="text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full"
+                      style={isActive ? { background: '#ffffff', color: '#b71c1c' } : { background: '#d32f2f', color: '#ffffff' }}
+                    >
+                      {l.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+
+      <nav
+        className="sb-mobile md:hidden fixed bottom-0 inset-x-0 z-40 flex items-stretch"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {items.map(l => {
+          const isActive = l.page === currentPage;
+          return (
+            <button
+              key={l.page}
+              onClick={() => navigate(l.page)}
+              className="relative flex-1 flex flex-col items-center gap-1 pt-2 pb-1.5 transition-colors duration-200"
+              style={{ color: isActive ? '#d32f2f' : 'var(--muted-foreground)' }}
+            >
+              <span
+                className="absolute top-0 h-[2px] w-9 rounded-full origin-center transition-transform duration-300"
+                style={{ background: '#d32f2f', transform: isActive ? 'scaleX(1)' : 'scaleX(0)' }}
+              />
+              <span className="text-base leading-none">{l.icon}</span>
+              <span className="text-[10px] font-medium leading-none truncate max-w-full px-1">{l.label}</span>
+              {l.badge != null && l.badge > 0 && (
+                <span
+                  className="absolute top-1 right-[22%] text-[9px] font-bold min-w-[15px] h-[15px] px-0.5 flex items-center justify-center rounded-full"
+                  style={{ background: '#d32f2f', color: '#ffffff' }}
+                >
+                  {l.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+    </>
   );
 }
