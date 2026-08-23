@@ -4,6 +4,7 @@ import { Header, Footer } from './components/Layout';
 
 // Public pages
 import { HomePage, ExplorarPage, BuscarPage, DetallePage, HallFamaPage, SemillerosPage, CalendarioPage } from './pages/Public';
+import { CronologiaPage } from './pages/Cronologia';
 import { ProgresoPage } from './pages/Progreso';
 import { PerfilPage } from './pages/Perfil';
 // Auth pages
@@ -114,6 +115,8 @@ export default function App() {
         return <SemillerosPage navigate={navigate} />;
       case 'calendario':
         return <CalendarioPage navigate={navigate} />;
+      case 'cronologia':
+        return <CronologiaPage navigate={navigate} />;
       case 'progreso':
         return <ProgresoPage role={role} navigate={navigate} />;
       case 'perfil':
