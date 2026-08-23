@@ -296,3 +296,34 @@ body {
   border-left: 2px solid var(--primary);
   color: var(--primary);
 }
+
+/* ── La Ruta — cronología interactiva ─────────────────────────────────────── */
+
+@keyframes rutaPulse {
+  0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+  70% { box-shadow: 0 0 0 16px rgba(211, 47, 47, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+}
+.ruta-dot-active { animation: rutaPulse 2s ease-out infinite; }
+
+@keyframes rutaBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50% { transform: translateY(10px); opacity: 1; }
+}
+.ruta-scroll-hint { animation: rutaBounce 1.8s ease-in-out infinite; }
+
+.ruta-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.route-in .ruta-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ruta-dot-active,
+  .ruta-scroll-hint { animation: none; }
+  .ruta-item { transition: none; opacity: 1; transform: none; }
+}

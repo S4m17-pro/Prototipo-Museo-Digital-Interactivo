@@ -106,7 +106,7 @@ function HeroTimeline({ navigate }: { navigate: (page: Page) => void }) {
         )}
       </div>
 
-      <button onClick={() => navigate('explorar')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-4">
+      <button onClick={() => navigate('cronologia')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-4">
         Ver línea completa →
       </button>
     </div>

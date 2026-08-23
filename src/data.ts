@@ -2,7 +2,7 @@ export type Status = 'publicado' | 'pendiente' | 'institucional' | 'devuelto';
 export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado';
 
 export type Page =
-  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil' | 'calendario'
+  | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil' | 'calendario' | 'cronologia'
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
@@ -40,6 +40,8 @@ export interface TimelineEvent {
   title: string;
   description: string;
   type: 'fundacion' | 'logro' | 'evento' | 'investigacion';
+  /** Id del ContentItem relacionado en el museo (opcional) */
+  itemId?: string;
 }
 
 export interface HallMember {
@@ -134,8 +136,8 @@ export const timeline: TimelineEvent[] = [
   { year: 2004, title: 'Acreditación de Alta Calidad', description: 'El CNA otorga acreditación de alta calidad por primera vez al programa.', type: 'logro' },
   { year: 2009, title: 'Programa de Maestría', description: 'Apertura de la Maestría en Ingeniería de Software, primera en la facultad.', type: 'fundacion' },
   { year: 2015, title: 'Premio Nacional de Innovación', description: 'Proyecto de grado "SmartAgro" gana el premio INNOVA del Ministerio TIC.', type: 'logro' },
-  { year: 2019, title: 'Renovación Acreditación', description: 'Renovación de acreditación de alta calidad por 8 años, la máxima distinción.', type: 'logro' },
-  { year: 2022, title: 'Laboratorio de IA y Datos', description: 'Inauguración del laboratorio de Inteligencia Artificial y Ciencia de Datos.', type: 'evento' },
+  { year: 2019, title: 'Renovación Acreditación', description: 'Renovación de acreditación de alta calidad por 8 años, la máxima distinción.', type: 'logro', itemId: '3' },
+  { year: 2022, title: 'Laboratorio de IA y Datos', description: 'Inauguración del laboratorio de Inteligencia Artificial y Ciencia de Datos.', type: 'evento', itemId: '1' },
   { year: 2024, title: '50 Años de Excelencia', description: 'Celebración del medio siglo de formación de ingenieros íntegros y competentes.', type: 'fundacion' },
 ];
 
