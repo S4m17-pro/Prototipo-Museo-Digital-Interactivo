@@ -90,6 +90,13 @@ export default function App() {
     'admin-registros', 'admin-hall-registro',
   ];
 
+  const sidebarPages: Page[] = [
+    'est-dashboard', 'est-favoritos', 'est-contribuir', 'progreso',
+    'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
+    'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
+    'admin-registros', 'admin-hall-registro',
+  ];
+
   const renderPage = () => {
     switch (currentPage) {
       // ── PUBLIC ──
@@ -183,7 +190,7 @@ export default function App() {
         </div>
       )}
 
-      <main>
+      <main className={sidebarPages.includes(currentPage) ? 'pb-[72px] md:pb-0' : ''}>
         {renderPage()}
       </main>
 

@@ -42,7 +42,7 @@ interface CardProps {
 export function ContentCard({ item, navigate, showStatus = false }: CardProps) {
   return (
     <article
-      className="museum-card rounded overflow-hidden cursor-pointer group flex flex-col"
+      className="museum-card content-card rounded overflow-hidden cursor-pointer group flex flex-col h-full"
       onClick={() => navigate('detalle', item.id)}
     >
       <div className="relative overflow-hidden h-44 bg-gray-900">
@@ -65,7 +65,7 @@ export function ContentCard({ item, navigate, showStatus = false }: CardProps) {
             {new Date(item.date).toLocaleDateString('es-CO', { year: 'numeric', month: 'short' })}
           </span>
         </div>
-        <h3 className="font-serif text-base font-semibold leading-snug line-clamp-2" style={{ color: 'var(--card-foreground)' }}>
+        <h3 className="font-serif text-base font-semibold leading-snug line-clamp-2">
           {item.title}
         </h3>
         <p className="text-sm leading-relaxed line-clamp-2 flex-1" style={{ color: 'var(--muted-foreground)' }}>
@@ -77,6 +77,9 @@ export function ContentCard({ item, navigate, showStatus = false }: CardProps) {
             {item.author[0]}
           </div>
           <span className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }}>{item.author}</span>
+        </div>
+        <div className="flex items-center gap-1 text-xs font-medium text-[#d32f2f] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+          Ver detalle <span aria-hidden="true">→</span>
         </div>
       </div>
     </article>
