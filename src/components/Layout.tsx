@@ -82,18 +82,18 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
   const roleLinks: Record<string, { label: string; page: Page; icon?: string }[]> = {
     estudiante: [
       { label: 'Mi Espacio', page: 'est-dashboard' },
-      { label: 'Favoritos', page: 'est-favoritos' },
-      { label: 'Contribuir', page: 'est-contribuir' },
     ],
     docente: [
       { label: 'Mi Espacio', page: 'doc-dashboard' },
     ],
     egresado: [
       { label: 'Mi Espacio', page: 'est-dashboard' },
-      { label: 'Favoritos', page: 'est-favoritos' },
-      { label: 'Contribuir', page: 'est-contribuir' },
     ],
   };
+
+  const espacioPages: Page[] = ['est-dashboard', 'est-favoritos', 'est-contribuir'];
+  const isRoleLinkActive = (page: Page) =>
+    currentPage === page || (page === 'est-dashboard' && espacioPages.includes(currentPage));
 
   const dashboardLinks = isAuth ? (roleLinks[role] || []) : [];
   const roleBadge: Record<string, string> = {
@@ -140,7 +140,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
               key={l.page}
               onClick={() => navigate(l.page)}
               className="px-3 py-1.5 text-sm rounded transition-colors flex items-center gap-1.5"
-              style={{ color: currentPage === l.page ? '#d32f2f' : 'var(--secondary-foreground)', background: currentPage === l.page ? 'rgba(211, 47, 47,0.08)' : 'transparent' }}
+              style={{ color: isRoleLinkActive(l.page) ? '#d32f2f' : 'var(--secondary-foreground)', background: isRoleLinkActive(l.page) ? 'rgba(211, 47, 47,0.08)' : 'transparent' }}
             >
               {l.icon && <span className="relative">
                 {l.icon}
