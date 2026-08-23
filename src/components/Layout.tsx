@@ -1,5 +1,6 @@
 import type { Page, Role } from '../data';
 import { contentQueue, getDemoUserForRole } from '../data';
+import Logo from './Logo';
 
 type SidebarLink = { label: string; page: Page; icon: string; badge?: number };
 
@@ -113,10 +114,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
           onClick={() => navigate('home')}
           className="flex items-center gap-3 flex-shrink-0 group"
         >
-          <div className="w-8 h-8 rounded-sm flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #d32f2f, #660000)' }}>
-            <span className="text-sm font-bold text-black">UL</span>
-          </div>
+          <Logo />
           <div className="hidden sm:block">
             <div className="font-serif text-sm font-bold leading-none" style={{ color: '#d32f2f' }}>UniLibreTour</div>
             <div className="text-xs leading-none mt-0.5" style={{ color: 'var(--muted-foreground)' }}>Museo Digital Interactivo</div>

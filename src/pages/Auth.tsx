@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Page, Role } from '../data';
 import { StepIndicator } from '../components/UI';
+import Logo from '../components/Logo';
 
 // ── LOGIN ────────────────────────────────────────────────────────────────────
 
@@ -36,9 +37,8 @@ export function LoginPage({ navigate, onLogin }: LoginProps) {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded mx-auto mb-3 flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #d32f2f, #660000)' }}>
-            <span className="font-bold text-black">UL</span>
+          <div className="mt-8 mb-3 flex justify-center">
+            <Logo size="lg" />
           </div>
           <h1 className="font-serif text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Acceso al Museo</h1>
           <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Ingresa con tus credenciales institucionales</p>
