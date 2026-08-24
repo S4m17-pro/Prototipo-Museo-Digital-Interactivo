@@ -4,7 +4,7 @@ export type Role = 'visitante' | 'estudiante' | 'docente' | 'admin' | 'egresado'
 export type Page =
   | 'home' | 'explorar' | 'buscar' | 'detalle' | 'hall-fama' | 'semilleros' | 'progreso' | 'perfil' | 'calendario' | 'cronologia'
   | 'login' | '2fa' | 'registro'
-  | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
+  | 'est-dashboard' | 'est-contribuir' | 'est-favoritos' | 'est-aportes'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
   | 'admin-dashboard' | 'admin-usuarios' | 'admin-cola' | 'admin-anadir'
   | 'admin-validacion' | 'admin-confirmacion'
