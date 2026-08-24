@@ -230,6 +230,23 @@ export function CronologiaPage({ navigate }: CronologiaProps) {
       <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
         {ev.description}
       </p>
+      {ev.media && ev.media.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {ev.media.map((f, i) => (
+            <span
+              key={`${f}-${i}`}
+              className="text-[10px] px-2 py-0.5 rounded font-mono truncate max-w-full"
+              style={{
+                background: `${typeColors[ev.type]}12`,
+                color: 'var(--secondary-foreground)',
+                border: `1px solid ${typeColors[ev.type]}30`,
+              }}
+            >
+              📎 {f}
+            </span>
+          ))}
+        </div>
+      )}
       <span className="inline-block mt-4 text-xs font-medium transition-transform duration-300 group-hover:translate-x-1" style={{ color: '#d32f2f' }}>
         {ev.itemId ? 'Ver pieza relacionada →' : 'Explorar colecciones →'}
       </span>

@@ -714,6 +714,8 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [pill, setPill] = useState<{ top: number; height: number; ready: boolean }>({ top: 0, height: 0, ready: false });
+  const [mediaFiles, setMediaFiles] = useState<string[]>([]);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     if (presetTab && ADD_TABS.some(t => t.id === presetTab)) setTab(presetTab);
@@ -739,6 +741,8 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
     setForm({});
     setError('');
     setSavedMsg(null);
+    setMediaFiles([]);
+    setDragOver(false);
   };
 
   const setF = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -768,12 +772,18 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
     switch (tab) {
       case 'timeline': {
         if (!requireFields({ Año: form.year, Título: form.title, Descripción: form.description }) || !validYear(form.year) || !form.type) return;
+        if (mediaFiles.length === 0) {
+          setError('Debes adjuntar al menos una evidencia multimedia.');
+          return;
+        }
         addTimelineEvent({
           year: Number(form.year),
           title: form.title.trim(),
           description: form.description.trim(),
           type: form.type as TimelineEvent['type'],
+          media: mediaFiles,
         });
+        setMediaFiles([]);
         break;
       }
       case 'premio': {
@@ -923,6 +933,42 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
                   </div>
                   <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Inauguración del nuevo laboratorio…" className={inputCls} /></Field>
                   <Field label="Descripción *"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Describe el hito…" className={`${inputCls} resize-none`} /></Field>
+                  <div>
+                    <span className="block text-xs font-mono uppercase tracking-widest mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Evidencias Multimedia *</span>
+                    <div
+                      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={e => {
+                        e.preventDefault();
+                        setDragOver(false);
+                        const dropped = Array.from(e.dataTransfer.files).map(f => f.name);
+                        setMediaFiles(prev => [...prev, ...dropped]);
+                      }}
+                      className="rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-all"
+                      style={{
+                        borderColor: dragOver ? 'rgba(211, 47, 47,0.6)' : 'rgba(211, 47, 47,0.2)',
+                        background: dragOver ? 'rgba(211, 47, 47,0.04)' : 'transparent',
+                      }}
+                      onClick={() => setMediaFiles(prev => [...prev, `evidencia_${prev.length + 1}.pdf`])}
+                    >
+                      <div className="text-2xl mb-1.5 opacity-50">📎</div>
+                      <p className="text-sm font-medium" style={{ color: 'var(--secondary-foreground)' }}>Arrastra archivos aquí o haz clic para seleccionar</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>Fotos, videos, audios o documentos que respalden el hito (máx. 50 MB por archivo)</p>
+                    </div>
+                    {mediaFiles.length > 0 && (
+                      <div className="flex flex-col gap-2 mt-3">
+                        {mediaFiles.map((f, i) => (
+                          <div key={`${f}-${i}`} className="flex items-center gap-2 text-sm px-3 py-2 rounded"
+                            style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                            <span style={{ color: '#22c55e' }}>✓</span>
+                            <span style={{ color: 'var(--secondary-foreground)' }}>{f}</span>
+                            <button type="button" onClick={() => setMediaFiles(prev => prev.filter((_, j) => j !== i))}
+                              className="ml-auto text-xs" style={{ color: 'var(--muted-foreground)' }}>✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <SubmitRow onSubmit={submit} />
                 </div>
               )}

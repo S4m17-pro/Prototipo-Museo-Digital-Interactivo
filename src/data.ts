@@ -42,6 +42,8 @@ export interface TimelineEvent {
   type: 'fundacion' | 'logro' | 'evento' | 'investigacion';
   /** Id del ContentItem relacionado en el museo (opcional) */
   itemId?: string;
+  /** Evidencias multimedia adjuntas (nombres de archivo en el prototipo) */
+  media?: string[];
 }
 
 export interface HallMember {
