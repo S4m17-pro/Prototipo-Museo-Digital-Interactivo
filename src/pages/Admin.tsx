@@ -820,7 +820,8 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
           year: Number(form.year),
           achievement: form.achievement.trim(),
           category: form.category,
-          image: PERSON_PLACEHOLDER_IMAGE,
+          image: form.image?.trim() || PERSON_PLACEHOLDER_IMAGE,
+          bio: form.bio?.trim() || undefined,
         });
         break;
       }
@@ -1047,6 +1048,8 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
                     </Field>
                   </div>
                   <Field label="Logro destacado *"><textarea rows={3} value={form.achievement || ''} onChange={setF('achievement')} placeholder="Describe su logro más relevante…" className={`${inputCls} resize-none`} /></Field>
+                  <Field label="URL de foto (opcional)"><input value={form.image || ''} onChange={setF('image')} placeholder="https://…" className={inputCls} /></Field>
+                  <Field label="Biografía"><textarea rows={4} value={form.bio || ''} onChange={setF('bio')} placeholder="Trayectoria profesional y académica del miembro. Se mostrará en su perfil del Hall de la Fama…" className={`${inputCls} resize-none`} /></Field>
                   <SubmitRow onSubmit={submit} />
                 </div>
               )}
