@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { contentItems, teacherOptions, getDemoUserForRole, getContributionsFor } from '../data';
+import { teacherOptions, getDemoUserForRole, getContributionsFor } from '../data';
 import type { Page, Role } from '../data';
+import { useData } from '../context/DataContext';
 import { ContentCard, StatusBadge, SectionHeader, StatCard, StepIndicator, Checkbox, EmptyState } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
@@ -15,6 +16,7 @@ interface Props {
 
 export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props) {
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const { contentItems } = useData();
   const me = getDemoUserForRole(role);
   const myContent = me ? getContributionsFor(me) : [];
   const myPublished = myContent.filter(i => i.status === 'publicado' || i.status === 'institucional');
@@ -123,6 +125,7 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
 // ── FAVORITOS ─────────────────────────────────────────────────────────────────
 
 export function EstFavoritos({ navigate, favorites, onToggleFavorite }: Props) {
+  const { contentItems } = useData();
   const favItems = contentItems.filter(i => favorites.includes(i.id));
 
   return (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Page } from '../data';
-import { contentItems, getDemoUserForRole, getContributionsFor } from '../data';
+import { getDemoUserForRole, getContributionsFor } from '../data';
+import { useData } from '../context/DataContext';
 import { StatusBadge, SectionHeader, StepIndicator, Checkbox, EmptyState } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
 
@@ -8,6 +9,7 @@ import { DashboardSidebar } from '../components/Layout';
 
 export function DocDashboard({ navigate }: { navigate: (page: Page, id?: string) => void }) {
   const [activeTab, setActiveTab] = useState<'mio' | 'involucrado'>('mio');
+  const { contentItems } = useData();
   const me = getDemoUserForRole('docente');
   const myAllContent = me ? getContributionsFor(me) : [];
   const myContent = myAllContent.filter(i => i.status === 'pendiente' || i.status === 'devuelto');

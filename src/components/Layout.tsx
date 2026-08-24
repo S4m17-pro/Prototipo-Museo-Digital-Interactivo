@@ -9,6 +9,7 @@ function getAdminNavLinks(): SidebarLink[] {
   const pendingCount = contentQueue.filter(i => i.status === 'pendiente').length;
   return [
     { label: 'Dashboard', page: 'admin-dashboard', icon: '⊞' },
+    { label: 'Añadir Información', page: 'admin-anadir', icon: '➕' },
     { label: 'Cola de Contenido', page: 'admin-cola', icon: '📋', badge: pendingCount },
     { label: 'Usuarios', page: 'admin-usuarios', icon: '👥' },
     { label: 'Registros Generales', page: 'admin-registros', icon: '🗃' },
@@ -91,11 +92,18 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
     egresado: [
       { label: 'Mi Espacio', page: 'est-dashboard' },
     ],
+    admin: [
+      { label: 'Panel Admin', page: 'admin-dashboard' },
+    ],
   };
 
   const espacioPages: Page[] = ['est-dashboard', 'est-favoritos', 'est-contribuir'];
+  const docentePages: Page[] = ['doc-dashboard', 'doc-wizard', 'doc-notificaciones'];
   const isRoleLinkActive = (page: Page) =>
-    currentPage === page || (page === 'est-dashboard' && espacioPages.includes(currentPage));
+    currentPage === page ||
+    (page === 'est-dashboard' && espacioPages.includes(currentPage)) ||
+    (page === 'doc-dashboard' && docentePages.includes(currentPage)) ||
+    (page === 'admin-dashboard' && currentPage.startsWith('admin-'));
 
   const dashboardLinks = isAuth ? (roleLinks[role] || []) : [];
   const roleBadge: Record<string, string> = {

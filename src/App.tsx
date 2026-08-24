@@ -14,7 +14,8 @@ import { EstDashboard, EstFavoritos, EstContribuir } from './pages/Student';
 // Teacher pages
 import { DocDashboard, DocWizard, DocNotificaciones } from './pages/Teacher';
 // Admin pages
-import { AdminDashboard, AdminUsuarios, AdminCola, AdminValidacion, AdminConfirmacion, AdminRegistros, AdminHallRegistro } from './pages/Admin';
+import { AdminDashboard, AdminUsuarios, AdminCola, AdminValidacion, AdminConfirmacion, AdminRegistros, AdminHallRegistro, AdminAnadir } from './pages/Admin';
+import { DataProvider } from './context/DataContext';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -27,6 +28,7 @@ export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [profileUserId, setProfileUserId] = useState<string | undefined>(undefined);
   const [profileEdits, setProfileEdits] = useState<Record<string, { bio?: string; photoUrl?: string }>>({});
+  const [anadirTab, setAnadirTab] = useState<string | undefined>(undefined);
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
@@ -39,6 +41,7 @@ export default function App() {
     if (page === 'admin-validacion' && id) setValidacionId(id);
     if (page === 'admin-confirmacion' && id) setValidacionId(id);
     if (page === 'perfil') setProfileUserId(id);
+    if (page === 'admin-anadir') setAnadirTab(id);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -87,14 +90,14 @@ export default function App() {
     'est-dashboard', 'est-contribuir', 'est-favoritos',
     'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
     'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
-    'admin-registros', 'admin-hall-registro',
+    'admin-registros', 'admin-hall-registro', 'admin-anadir',
   ];
 
   const sidebarPages: Page[] = [
     'est-dashboard', 'est-favoritos', 'est-contribuir', 'progreso',
     'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
     'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
-    'admin-registros', 'admin-hall-registro',
+    'admin-registros', 'admin-hall-registro', 'admin-anadir',
   ];
 
   const renderPage = () => {
@@ -156,6 +159,8 @@ export default function App() {
       // ── ADMIN ──
       case 'admin-dashboard':
         return <AdminDashboard navigate={navigate} />;
+      case 'admin-anadir':
+        return <AdminAnadir key={anadirTab ?? 'default'} navigate={navigate} presetTab={anadirTab} />;
       case 'admin-usuarios':
         return <AdminUsuarios navigate={navigate} />;
       case 'admin-cola':
@@ -175,7 +180,8 @@ export default function App() {
   };
 
   return (
-    <div data-theme={theme} style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)', transition: 'background 0.3s, color 0.3s' }}>
+    <DataProvider>
+      <div data-theme={theme} style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)', transition: 'background 0.3s, color 0.3s' }}>
       <Header currentPage={currentPage} role={role} navigate={navigate} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
 
       {/* Registration success banner */}
@@ -197,6 +203,7 @@ export default function App() {
       {!noFooterPages.includes(currentPage) && (
         <Footer navigate={navigate} />
       )}
-    </div>
+      </div>
+    </DataProvider>
   );
 }

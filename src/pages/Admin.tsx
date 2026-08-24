@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import { users, contentQueue, kpiData } from '../data';
-import type { Page, ContentItem } from '../data';
+import type { Page, ContentItem, TimelineEvent, EventItem } from '../data';
+import { useData, PLACEHOLDER_IMAGE, PERSON_PLACEHOLDER_IMAGE } from '../context/DataContext';
 import { StatusBadge, SectionHeader, StatCard, CategoryBadge, StepIndicator } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
+
+// ── PESTAÑAS DE "AÑADIR INFORMACIÓN" ─────────────────────────────────────────
+
+const ADD_TABS = [
+  { id: 'timeline', label: 'Línea de Tiempo', icon: '📅' },
+  { id: 'premio', label: 'Premios y Reconocimientos', icon: '🏆' },
+  { id: 'proyecto', label: 'Proyectos Destacados', icon: '🎓' },
+  { id: 'hall', label: 'Hall de la Fama', icon: '⭐' },
+  { id: 'evento', label: 'Eventos del Calendario', icon: '🗓️' },
+];
 
 // ── KPI CHART (CSS bars) ─────────────────────────────────────────────────────
 
@@ -27,7 +38,7 @@ function BarChart() {
 
 // ── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
 
-export function AdminDashboard({ navigate }: { navigate: (page: Page) => void }) {
+export function AdminDashboard({ navigate }: { navigate: (page: Page, id?: string) => void }) {
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
       <div className="flex gap-8">
@@ -45,6 +56,28 @@ export function AdminDashboard({ navigate }: { navigate: (page: Page) => void })
                 {contentQueue.filter(i => i.status === 'pendiente').length}
               </span>
             </button>
+          </div>
+
+          {/* Accesos rápidos: Añadir información */}
+          <div className="museum-card rounded p-5 mb-8">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>➕ Añadir Información</h3>
+              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Se publica de inmediato en el museo</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {ADD_TABS.map(t => (
+                <button key={t.id} onClick={() => navigate('admin-anadir', t.id)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all hover:translate-y-[-2px]"
+                  style={{
+                    background: 'rgba(211, 47, 47,0.06)',
+                    border: '1px solid rgba(211, 47, 47,0.22)',
+                    color: 'var(--secondary-foreground)',
+                  }}>
+                  <span>{t.icon}</span>
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* KPIs */}
@@ -649,6 +682,360 @@ export function AdminHallRegistro({ navigate }: { navigate: (page: Page) => void
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── ADMIN AÑADIR INFORMACIÓN ─────────────────────────────────────────────────
+
+interface AnadirProps {
+  navigate: (page: Page) => void;
+  presetTab?: string;
+}
+
+const inputCls = 'museum-input w-full px-3 py-2.5 rounded text-sm';
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-mono uppercase tracking-widest mb-1.5" style={{ color: 'var(--muted-foreground)' }}>
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
+  const { addTimelineEvent, addAchievement, addHallMember, addCalendarEvent, addFeaturedProject, resetData } = useData();
+  const [tab, setTab] = useState(presetTab && ADD_TABS.some(t => t.id === presetTab) ? presetTab : 'timeline');
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [error, setError] = useState('');
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [pill, setPill] = useState<{ top: number; height: number; ready: boolean }>({ top: 0, height: 0, ready: false });
+
+  useEffect(() => {
+    if (presetTab && ADD_TABS.some(t => t.id === presetTab)) setTab(presetTab);
+  }, [presetTab]);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const idx = ADD_TABS.findIndex(t => t.id === tab);
+      const el = tabRefs.current[idx];
+      if (!el) {
+        setPill(p => (p.ready ? { ...p, ready: false } : p));
+        return;
+      }
+      setPill({ top: el.offsetTop, height: el.offsetHeight, ready: true });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [tab]);
+
+  const switchTab = (id: string) => {
+    setTab(id);
+    setForm({});
+    setError('');
+    setSavedMsg(null);
+  };
+
+  const setF = (k: string) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const requireFields = (fields: Record<string, string | undefined>): boolean => {
+    for (const [label, value] of Object.entries(fields)) {
+      if (!value || !String(value).trim()) {
+        setError(`El campo "${label}" es obligatorio.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validYear = (value: string | undefined): value is string => {
+    const year = Number(value);
+    if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+      setError('El año debe estar entre 1900 y 2100.');
+      return false;
+    }
+    return true;
+  };
+
+  const submit = () => {
+    setError('');
+    switch (tab) {
+      case 'timeline': {
+        if (!requireFields({ Año: form.year, Título: form.title, Descripción: form.description }) || !validYear(form.year) || !form.type) return;
+        addTimelineEvent({
+          year: Number(form.year),
+          title: form.title.trim(),
+          description: form.description.trim(),
+          type: form.type as TimelineEvent['type'],
+        });
+        break;
+      }
+      case 'premio': {
+        if (!requireFields({ Año: form.year, Título: form.title, Institución: form.institution, Descripción: form.description }) || !validYear(form.year)) return;
+        addAchievement({
+          year: Number(form.year),
+          title: form.title.trim(),
+          institution: form.institution.trim(),
+          category: form.category || 'premio',
+          description: form.description.trim(),
+          image: PLACEHOLDER_IMAGE,
+        });
+        break;
+      }
+      case 'proyecto': {
+        if (!requireFields({ Título: form.title, Autor: form.author, Fecha: form.date, Descripción: form.description }) || !form.category) return;
+        addFeaturedProject({
+          title: form.title.trim(),
+          author: form.author.trim(),
+          category: form.category,
+          date: form.date,
+          description: form.description.trim(),
+          tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+          image: form.image,
+        });
+        break;
+      }
+      case 'hall': {
+        if (!requireFields({ Nombre: form.name, Título: form.title, Año: form.year, Logro: form.achievement }) || !validYear(form.year) || !form.category) return;
+        addHallMember({
+          name: form.name.trim(),
+          title: form.title.trim(),
+          year: Number(form.year),
+          achievement: form.achievement.trim(),
+          category: form.category,
+          image: PERSON_PLACEHOLDER_IMAGE,
+        });
+        break;
+      }
+      case 'evento': {
+        if (!requireFields({ Título: form.title, Fecha: form.date, Hora: form.time, Lugar: form.location }) || !form.type) return;
+        addCalendarEvent({
+          title: form.title.trim(),
+          date: form.date,
+          time: form.time,
+          location: form.location.trim(),
+          type: form.type as EventItem['type'],
+          description: form.description?.trim() || '',
+        });
+        break;
+      }
+    }
+    const label = ADD_TABS.find(t => t.id === tab)?.label ?? '';
+    setSavedMsg(`${label}: registro publicado`);
+    setForm({});
+  };
+
+  if (savedMsg) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+        <div className="flex gap-8">
+          <DashboardSidebar role="admin" currentPage="admin-anadir" navigate={navigate} />
+          <div className="flex-1 flex items-center justify-center min-h-80">
+            <div className="text-center max-w-sm">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"
+                style={{ background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.3)' }}>✓</div>
+              <h2 className="font-serif text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>¡{savedMsg}!</h2>
+              <p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
+                La información ya está disponible en su sección pública del museo.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button onClick={() => setSavedMsg(null)} className="btn-outline-primary px-5 py-2.5 rounded text-sm">
+                  Añadir otro
+                </button>
+                <button onClick={() => navigate('admin-dashboard')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold">
+                  Ir al Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+      <div className="flex gap-8">
+        <DashboardSidebar role="admin" currentPage="admin-anadir" navigate={navigate} />
+        <div className="flex-1 min-w-0">
+          <SectionHeader label="Administración" title="Añadir Información" subtitle="Publica hitos, premios, proyectos, miembros del Hall y eventos directamente en el museo." />
+
+          <div className="grid grid-cols-1 lg:grid-cols-[230px_1fr] gap-6 items-start">
+            {/* Selector de tipo */}
+            <nav className="relative flex lg:flex-col gap-1 overflow-x-auto pb-1">
+              {ADD_TABS.map((t, i) => {
+                const isActive = t.id === tab;
+                return (
+                  <button key={t.id} onClick={() => switchTab(t.id)}
+                    ref={el => {
+                      tabRefs.current[i] = el;
+                    }}
+                    className={`sb-item group relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${isActive ? '' : 'hover:translate-x-1'}`}
+                    style={{ color: isActive ? '#ffffff' : 'var(--secondary-foreground)', animationDelay: `${i * 50}ms` }}>
+                    <span className={`sb-chip ${isActive ? 'sb-chip-on' : ''}`}>{t.icon}</span>
+                    <span className="truncate">{t.label}</span>
+                  </button>
+                );
+              })}
+              <div
+                aria-hidden="true"
+                className="hidden lg:block absolute left-0 right-0 rounded-lg pointer-events-none z-0"
+                style={{
+                  transform: `translateY(${pill.top}px)`,
+                  height: pill.height,
+                  opacity: pill.ready ? 1 : 0,
+                  background: 'linear-gradient(135deg, #e53935, #b71c1c)',
+                  boxShadow: '0 4px 16px rgba(211, 47, 47, 0.45)',
+                  transition:
+                    'transform .38s cubic-bezier(0.22, 0.61, 0.36, 1), height .38s cubic-bezier(0.22, 0.61, 0.36, 1), opacity .25s ease .1s',
+                }}
+              />
+            </nav>
+
+            {/* Formulario */}
+            <div className="museum-card rounded p-6">
+              {error && (
+                <div className="mb-4 text-xs px-3 py-2 rounded" style={{ background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}>
+                  ⚠ {error}
+                </div>
+              )}
+
+              {tab === 'timeline' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>📅 Nuevo hito de la línea de tiempo</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Año *"><input type="number" min={1900} max={2100} value={form.year || ''} onChange={setF('year')} placeholder="2024" className={inputCls} /></Field>
+                    <Field label="Tipo *">
+                      <select value={form.type || ''} onChange={setF('type')} className={inputCls}>
+                        <option value="">Selecciona…</option>
+                        <option value="fundacion">Fundación</option>
+                        <option value="logro">Logro</option>
+                        <option value="evento">Evento</option>
+                        <option value="investigacion">Investigación</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Inauguración del nuevo laboratorio…" className={inputCls} /></Field>
+                  <Field label="Descripción *"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Describe el hito…" className={`${inputCls} resize-none`} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              {tab === 'premio' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>🏆 Nuevo premio o reconocimiento</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Año *"><input type="number" min={1900} max={2100} value={form.year || ''} onChange={setF('year')} placeholder="2025" className={inputCls} /></Field>
+                    <Field label="Categoría">
+                      <select value={form.category || 'premio'} onChange={setF('category')} className={inputCls}>
+                        <option value="premio">Premio</option>
+                        <option value="certificacion">Certificación</option>
+                        <option value="reconocimiento">Reconocimiento</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Premio Nacional de Ingeniería…" className={inputCls} /></Field>
+                  <Field label="Institución otorgante *"><input value={form.institution || ''} onChange={setF('institution')} placeholder="Ministerio de Tecnologías de la Información…" className={inputCls} /></Field>
+                  <Field label="Descripción *"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Describe el reconocimiento…" className={`${inputCls} resize-none`} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              {tab === 'proyecto' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>🎓 Nuevo proyecto destacado</h3>
+                  <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Plataforma web para… " className={inputCls} /></Field>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Autor *"><input value={form.author || ''} onChange={setF('author')} placeholder="Nombre del autor…" className={inputCls} /></Field>
+                    <Field label="Fecha *"><input type="date" value={form.date || ''} onChange={setF('date')} className={inputCls} /></Field>
+                  </div>
+                  <Field label="Categoría *">
+                    <select value={form.category || ''} onChange={setF('category')} className={inputCls}>
+                      <option value="">Selecciona…</option>
+                      {['investigacion', 'proyectos', 'historia', 'eventos', 'logros', 'docentes'].map(c => (
+                        <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Descripción *"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Describe el proyecto…" className={`${inputCls} resize-none`} /></Field>
+                  <Field label="Etiquetas (separadas por coma)"><input value={form.tags || ''} onChange={setF('tags')} placeholder="IA, Python, Salud" className={inputCls} /></Field>
+                  <Field label="URL de imagen (opcional)"><input value={form.image || ''} onChange={setF('image')} placeholder="https://…" className={inputCls} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              {tab === 'hall' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>⭐ Nuevo miembro del Hall de la Fama</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Nombre completo *"><input value={form.name || ''} onChange={setF('name')} placeholder="Ing. Nombre Apellido…" className={inputCls} /></Field>
+                    <Field label="Cargo actual *"><input value={form.title || ''} onChange={setF('title')} placeholder="CTO – Empresa…" className={inputCls} /></Field>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Año de graduación *"><input type="number" min={1900} max={2100} value={form.year || ''} onChange={setF('year')} placeholder="2010" className={inputCls} /></Field>
+                    <Field label="Categoría *">
+                      <select value={form.category || ''} onChange={setF('category')} className={inputCls}>
+                        <option value="">Selecciona…</option>
+                        {['Industria Tecnológica', 'Investigación', 'Gestión Académica', 'Emprendimiento', 'Docencia', 'Sector Público'].map(c => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Logro destacado *"><textarea rows={3} value={form.achievement || ''} onChange={setF('achievement')} placeholder="Describe su logro más relevante…" className={`${inputCls} resize-none`} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              {tab === 'evento' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>🗓️ Nuevo evento en el calendario</h3>
+                  <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Conferencia: …" className={inputCls} /></Field>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Field label="Fecha *"><input type="date" value={form.date || ''} onChange={setF('date')} className={inputCls} /></Field>
+                    <Field label="Hora *"><input type="time" value={form.time || ''} onChange={setF('time')} className={inputCls} /></Field>
+                    <Field label="Tipo *">
+                      <select value={form.type || ''} onChange={setF('type')} className={inputCls}>
+                        <option value="">Selecciona…</option>
+                        <option value="conferencia">Conferencia</option>
+                        <option value="taller">Taller</option>
+                        <option value="graduacion">Graduación</option>
+                        <option value="cultural">Cultural</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Lugar *"><input value={form.location || ''} onChange={setF('location')} placeholder="Auditorio Principal…" className={inputCls} /></Field>
+                  <Field label="Descripción"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Detalles del evento…" className={`${inputCls} resize-none`} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              <div className="mt-8 pt-4" style={{ borderTop: '1px solid rgba(211,47,47,0.12)' }}>
+                <button onClick={() => { if (window.confirm('¿Restaurar todos los datos demo? Se perderá la información añadida.')) resetData(); }}
+                  className="text-xs btn-outline-primary px-3 py-2 rounded">
+                  ↺ Restaurar datos demo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SubmitRow({ onSubmit }: { onSubmit: () => void }) {
+  return (
+    <div className="flex justify-end pt-2">
+      <button onClick={onSubmit} className="btn-primary btn-float px-6 py-2.5 rounded text-sm font-semibold">
+        Publicar en el museo →
+      </button>
     </div>
   );
 }

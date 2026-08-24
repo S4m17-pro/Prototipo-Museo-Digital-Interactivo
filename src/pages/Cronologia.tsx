@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { timeline } from '../data';
 import type { Page, TimelineEvent } from '../data';
+import { useData } from '../context/DataContext';
 
 // ── LA RUTA — Cronología interactiva con dibujo por scroll ──────────────────
 
@@ -36,6 +36,7 @@ interface CronologiaProps {
 }
 
 export function CronologiaPage({ navigate }: CronologiaProps) {
+  const { timeline } = useData();
   const isDesktop = useIsDesktop();
   const containerRef = useRef<HTMLDivElement>(null);
   const drawPathRef = useRef<SVGPathElement>(null);
@@ -338,10 +339,11 @@ export function CronologiaPage({ navigate }: CronologiaProps) {
 
         {/* Hitos */}
         {timeline.map((ev, i) => {
+          const rowKey = `${ev.year}-${i}`;
           if (!isDesktop) {
             // Móvil: línea implícita al costado izquierdo (los nodos casi verticales guían el trazo)
             return (
-              <div key={ev.year} ref={setRowRef(i)} className="relative flex items-center gap-4 py-8 pl-3 pr-4 lg:hidden">
+              <div key={rowKey} ref={setRowRef(i)} className="relative flex items-center gap-4 py-8 pl-3 pr-4 lg:hidden">
                 <div ref={setDotRef(i)} className="relative z-10 shrink-0">
                   <Dot ev={ev} active={activeIndex === i} />
                 </div>
@@ -351,7 +353,7 @@ export function CronologiaPage({ navigate }: CronologiaProps) {
           }
           const left = i % 2 === 0;
           return (
-            <div key={ev.year} ref={setRowRef(i)} className="relative hidden lg:flex items-center min-h-[58vh]">
+            <div key={rowKey} ref={setRowRef(i)} className="relative hidden lg:flex items-center min-h-[58vh]">
               {/* Mitad izquierda */}
               <div className={`w-1/2 flex ${left ? 'justify-end pr-[13%]' : 'justify-end pr-[9%]'}`}>
                 {left ? <EventCard ev={ev} /> : <YearBlock ev={ev} />}
@@ -415,7 +417,7 @@ export function CronologiaPage({ navigate }: CronologiaProps) {
         </span>
         {timeline.map((ev, i) => (
           <button
-            key={ev.year}
+            key={`${ev.year}-${i}`}
             onClick={() => jumpTo(i)}
             aria-label={`Ir a ${ev.year} — ${ev.title}`}
             title={`${ev.year} · ${ev.title}`}
