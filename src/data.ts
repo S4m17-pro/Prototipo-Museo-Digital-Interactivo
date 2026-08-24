@@ -63,6 +63,7 @@ export interface HallMember {
   achievement: string;
   image: string;
   category: string;
+  bio?: string;
 }
 
 export interface User {

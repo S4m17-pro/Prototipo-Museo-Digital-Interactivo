@@ -974,8 +974,8 @@ export function HallFamaPage({ navigate }: { navigate: (page: Page) => void }) {
             <h1 className="font-serif text-3xl font-bold" style={{ color: 'var(--foreground)' }}>{member.name}</h1>
             <p className="font-semibold" style={{ color: '#d32f2f' }}>{member.title}</p>
             <p className="text-base leading-relaxed" style={{ color: 'var(--secondary-foreground)' }}>{member.achievement}</p>
-            <div className="museum-card rounded p-4 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              Egresado del Programa de Ingeniería de Sistemas de la Universidad Libre, cohorte {member.year}. Su trayectoria profesional ha sido un referente para las nuevas generaciones de ingenieros formados en la institución.
+            <div className="museum-card rounded p-4 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+              {member.bio || `Egresado del Programa de Ingeniería de Sistemas de la Universidad Libre, cohorte ${member.year}. Su trayectoria profesional ha sido un referente para las nuevas generaciones de ingenieros formados en la institución.`}
             </div>
           </div>
         </div>
