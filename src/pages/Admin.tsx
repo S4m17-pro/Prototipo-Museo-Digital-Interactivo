@@ -13,6 +13,7 @@ const ADD_TABS = [
   { id: 'proyecto', label: 'Proyectos Destacados', icon: '🎓' },
   { id: 'hall', label: 'Hall de la Fama', icon: '⭐' },
   { id: 'evento', label: 'Eventos del Calendario', icon: '🗓️' },
+  { id: 'noticias', label: 'Noticias', icon: '📰' },
 ];
 
 // ── KPI CHART (CSS bars) ─────────────────────────────────────────────────────
@@ -707,7 +708,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
-  const { addTimelineEvent, addAchievement, addHallMember, addCalendarEvent, addFeaturedProject, resetData } = useData();
+  const { addTimelineEvent, addAchievement, addHallMember, addCalendarEvent, addNews, addFeaturedProject, resetData } = useData();
   const [tab, setTab] = useState(presetTab && ADD_TABS.some(t => t.id === presetTab) ? presetTab : 'timeline');
   const [form, setForm] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
@@ -832,6 +833,17 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
           location: form.location.trim(),
           type: form.type as EventItem['type'],
           description: form.description?.trim() || '',
+        });
+        break;
+      }
+      case 'noticias': {
+        if (!requireFields({ Título: form.title, Fecha: form.date, Contenido: form.excerpt }) || !form.category) return;
+        addNews({
+          title: form.title.trim(),
+          category: form.category,
+          date: form.date,
+          excerpt: form.excerpt.trim(),
+          image: form.image?.trim() || PLACEHOLDER_IMAGE,
         });
         break;
       }
@@ -1058,6 +1070,27 @@ export function AdminAnadir({ navigate, presetTab }: AnadirProps) {
                   </div>
                   <Field label="Lugar *"><input value={form.location || ''} onChange={setF('location')} placeholder="Auditorio Principal…" className={inputCls} /></Field>
                   <Field label="Descripción"><textarea rows={3} value={form.description || ''} onChange={setF('description')} placeholder="Detalles del evento…" className={`${inputCls} resize-none`} /></Field>
+                  <SubmitRow onSubmit={submit} />
+                </div>
+              )}
+
+              {tab === 'noticias' && (
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-serif font-semibold" style={{ color: 'var(--card-foreground)' }}>📰 Nueva noticia</h3>
+                  <Field label="Título *"><input value={form.title || ''} onChange={setF('title')} placeholder="Título de la noticia…" className={inputCls} /></Field>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Categoría *">
+                      <select value={form.category || ''} onChange={setF('category')} className={inputCls}>
+                        <option value="">Selecciona…</option>
+                        {['Institucional', 'Archivo', 'Investigación', 'Hall de la Fama', 'Convocatoria', 'Evento'].map(c => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Fecha *"><input type="date" value={form.date || ''} onChange={setF('date')} className={inputCls} /></Field>
+                  </div>
+                  <Field label="Contenido *"><textarea rows={5} value={form.excerpt || ''} onChange={setF('excerpt')} placeholder="Escribe la noticia completa. Aparecerá en el carrusel del inicio y en la sección Noticias de Explorar…" className={`${inputCls} resize-none`} /></Field>
+                  <Field label="URL de imagen (opcional)"><input value={form.image || ''} onChange={setF('image')} placeholder="https://…" className={inputCls} /></Field>
                   <SubmitRow onSubmit={submit} />
                 </div>
               )}
