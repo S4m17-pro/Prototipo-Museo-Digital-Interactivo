@@ -6,7 +6,7 @@ export type Page =
   | 'login' | '2fa' | 'registro'
   | 'est-dashboard' | 'est-contribuir' | 'est-favoritos'
   | 'doc-dashboard' | 'doc-wizard' | 'doc-notificaciones'
-  | 'admin-dashboard' | 'admin-usuarios' | 'admin-cola'
+  | 'admin-dashboard' | 'admin-usuarios' | 'admin-cola' | 'admin-anadir'
   | 'admin-validacion' | 'admin-confirmacion'
   | 'admin-hall-registro' | 'admin-registros';
 
@@ -441,7 +441,17 @@ export const researchGroups = [
   { id: '4', name: 'SISDIS', category: 'grupo', lead: 'Dra. Marcela Ospina Ruiz', members: 18, description: 'Sistemas Distribuidos y Arquitecturas Paralelas.', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop&auto=format' }
 ];
 
-export const achievements = [
+export interface Achievement {
+  id: string;
+  title: string;
+  year: number;
+  category: string;
+  institution: string;
+  description: string;
+  image: string;
+}
+
+export const achievements: Achievement[] = [
   { id: '1', title: 'Premio Innova MinTIC', year: 2015, category: 'premio', institution: 'Ministerio TIC', description: 'Reconocimiento a proyectos de alto impacto tecnológico.', image: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600&h=400&fit=crop&auto=format' },
   { id: '2', title: 'Acreditación CNA', year: 2019, category: 'certificacion', institution: 'CNA', description: 'Acreditación de alta calidad por 8 años.', image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&auto=format' },
   { id: '3', title: 'Premio SciHub', year: 2021, category: 'premio', institution: 'Colciencias', description: 'Reconocimiento al grupo GISI por su aporte a la investigación.', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=400&fit=crop&auto=format' },

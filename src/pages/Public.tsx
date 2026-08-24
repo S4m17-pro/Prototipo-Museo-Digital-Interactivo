@@ -1,6 +1,7 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { collections, timeline, contentItems, hallMembers, achievements, researchGroups, users, events } from '../data';
+import { useState, useEffect, useMemo, useLayoutEffect, useRef } from 'react';
+import { collections, researchGroups, users } from '../data';
 import type { Page, TimelineEvent } from '../data';
+import { useData } from '../context/DataContext';
 import { ContentCard, StatusBadge, SectionHeader, TagList, CategoryBadge } from '../components/UI';
 
 // ── HERO TIMELINE (selector por década) ─────────────────────────────────────
@@ -9,26 +10,31 @@ const typeColors: Record<string, string> = {
   fundacion: '#d32f2f', logro: '#22c55e', evento: '#3b82f6', investigacion: '#a855f7'
 };
 
-const decadeGroups: { decade: number; events: TimelineEvent[] }[] = Object.entries(
-  timeline.reduce<Record<number, TimelineEvent[]>>((acc, ev) => {
-    const d = Math.floor(ev.year / 10) * 10;
-    (acc[d] ||= []).push(ev);
-    return acc;
-  }, {})
-)
-  .map(([decade, events]) => ({ decade: Number(decade), events }))
-  .sort((a, b) => a.decade - b.decade);
-
 function HeroTimeline({ navigate }: { navigate: (page: Page) => void }) {
+  const { timeline } = useData();
   const [active, setActive] = useState(0);
   const [autoOn, setAutoOn] = useState(true);
   const [hovered, setHovered] = useState(false);
+
+  const decadeGroups = useMemo(
+    () =>
+      Object.entries(
+        timeline.reduce<Record<number, TimelineEvent[]>>((acc, ev) => {
+          const d = Math.floor(ev.year / 10) * 10;
+          (acc[d] ||= []).push(ev);
+          return acc;
+        }, {})
+      )
+        .map(([decade, events]) => ({ decade: Number(decade), events }))
+        .sort((a, b) => a.decade - b.decade),
+    [timeline]
+  );
 
   useEffect(() => {
     if (!autoOn || hovered) return;
     const id = setInterval(() => setActive(a => (a + 1) % decadeGroups.length), 5000);
     return () => clearInterval(id);
-  }, [autoOn, hovered]);
+  }, [autoOn, hovered, decadeGroups]);
 
   const group = decadeGroups[active];
   const [main, ...rest] = group.events;
@@ -122,6 +128,7 @@ interface HomeProps {
 
 export function HomePage({ navigate, role }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { contentItems, achievements } = useData();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,6 +361,7 @@ export function HomePage({ navigate, role }: HomeProps) {
 
 export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string) => void }) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const { contentItems } = useData();
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [pill, setPill] = useState<{ left: number; top: number; width: number; height: number; ready: boolean }>({
     left: 0, top: 0, width: 0, height: 0, ready: false,
@@ -479,6 +487,7 @@ export function BuscarPage({ navigate }: { navigate: (page: Page, id?: string) =
   const [author, setAuthor] = useState('');
   const [category, setCategory] = useState('');
   const [year, setYear] = useState('');
+  const { contentItems } = useData();
 
   const results = contentItems.filter(i => {
     const matchQ = !query || i.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -562,6 +571,7 @@ interface DetalleProps {
 }
 
 export function DetallePage({ navigate, itemId, role, isFavorite, onToggleFavorite }: DetalleProps) {
+  const { contentItems } = useData();
   const item = contentItems.find(i => i.id === itemId) || contentItems[0];
   const authorUser = users.find(u => u.name === item.author && u.role !== 'admin');
   const related = contentItems.filter(i => i.id !== item.id && i.category === item.category).slice(0, 3);
@@ -777,6 +787,7 @@ export function DetallePage({ navigate, itemId, role, isFavorite, onToggleFavori
 // ── HALL DE LA FAMA ──────────────────────────────────────────────────────────
 
 export function HallFamaPage({ navigate }: { navigate: (page: Page) => void }) {
+  const { hallMembers } = useData();
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
 
@@ -958,6 +969,7 @@ function isoOf(d: Date): string {
 }
 
 export function CalendarioPage({ navigate }: { navigate: (page: Page) => void }) {
+  const { events } = useData();
   const now = new Date();
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [selectedDate, setSelectedDate] = useState(isoOf(now));
