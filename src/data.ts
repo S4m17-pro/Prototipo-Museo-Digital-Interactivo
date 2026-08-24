@@ -19,6 +19,15 @@ export interface Collection {
   image: string;
 }
 
+export interface NewsItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  image: string;
+}
+
 export interface ContentItem {
   id: string;
   title: string;
@@ -127,6 +136,49 @@ export const collections: Collection[] = [
     count: 74,
     icon: '👨‍🏫',
     image: 'https://images.unsplash.com/photo-1560523159-4a9692d222ef?w=600&h=400&fit=crop&auto=format',
+  },
+];
+
+export const newsItems: NewsItem[] = [
+  {
+    id: 'n1',
+    title: 'El programa celebra sus 50 años formando ingenieros íntegros',
+    excerpt: 'Con un acto protocolario en el Auditorio Principal y una exposición conmemorativa en el museo, la comunidad celebró medio siglo de historia desde su fundación en 1975.',
+    date: '2025-08-15',
+    category: 'Institucional',
+    image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&h=600&fit=crop&auto=format',
+  },
+  {
+    id: 'n2',
+    title: 'Nueva colección digitalizada: 300 fotografías históricas del programa',
+    excerpt: 'El archivo del museo incorpora imágenes restauradas de ceremonias, laboratorios y primeras cohortes, disponibles en alta resolución para consulta pública.',
+    date: '2025-08-02',
+    category: 'Archivo',
+    image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&h=600&fit=crop&auto=format',
+  },
+  {
+    id: 'n3',
+    title: 'SeedAI gana la maratón nacional de inteligencia artificial',
+    excerpt: 'El semillero de inteligencia artificial se quedó con el primer puesto entre 42 equipos universitarios con su sistema de detección temprana de inundaciones.',
+    date: '2025-07-21',
+    category: 'Investigación',
+    image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=600&fit=crop&auto=format',
+  },
+  {
+    id: 'n4',
+    title: 'Egresada Catalina Restrepo ingresa al Hall de la Fama',
+    excerpt: 'Directora de Innovación en el sector fintech y egresada de la cohorte 2018, reconocida por su trayectoria y aportes al ecosistema tecnológico nacional.',
+    date: '2025-07-10',
+    category: 'Hall de la Fama',
+    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=600&fit=crop&auto=format',
+  },
+  {
+    id: 'n5',
+    title: 'Abren convocatoria para proyectos destacados 2025',
+    excerpt: 'Estudiantes y egresados pueden postular sus proyectos de grado hasta el 31 de julio para ser publicados como piezas institucionales y optar por el Hall de la Fama.',
+    date: '2025-06-28',
+    category: 'Convocatoria',
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&h=600&fit=crop&auto=format',
   },
 ];
 

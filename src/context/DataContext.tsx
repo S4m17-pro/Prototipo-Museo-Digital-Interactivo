@@ -5,8 +5,9 @@ import {
   achievements as demoAchievements,
   hallMembers as demoHallMembers,
   contentItems as demoContentItems,
+  newsItems as demoNews,
 } from '../data';
-import type { TimelineEvent, EventItem, HallMember, ContentItem, Achievement } from '../data';
+import type { TimelineEvent, EventItem, HallMember, ContentItem, Achievement, NewsItem } from '../data';
 
 const STORAGE_KEY = 'museo-datos-v1';
 
@@ -22,6 +23,7 @@ interface DataState {
   achievements: Achievement[];
   hallMembers: HallMember[];
   contentItems: ContentItem[];
+  news: NewsItem[];
 }
 
 interface DataContextValue extends DataState {
@@ -29,6 +31,7 @@ interface DataContextValue extends DataState {
   addAchievement: (a: Omit<Achievement, 'id'>) => void;
   addHallMember: (m: Omit<HallMember, 'id'>) => void;
   addCalendarEvent: (e: Omit<EventItem, 'id'>) => void;
+  addNews: (n: Omit<NewsItem, 'id'>) => void;
   addFeaturedProject: (
     p: Pick<ContentItem, 'title' | 'category' | 'author' | 'date' | 'description'> & {
       tags?: string[];
@@ -44,6 +47,7 @@ const demoData: DataState = {
   achievements: demoAchievements,
   hallMembers: demoHallMembers,
   contentItems: demoContentItems,
+  news: demoNews,
 };
 
 function loadInitial(): DataState {
@@ -57,6 +61,7 @@ function loadInitial(): DataState {
         achievements: Array.isArray(parsed.achievements) && parsed.achievements.length ? parsed.achievements : demoData.achievements,
         hallMembers: Array.isArray(parsed.hallMembers) && parsed.hallMembers.length ? parsed.hallMembers : demoData.hallMembers,
         contentItems: Array.isArray(parsed.contentItems) && parsed.contentItems.length ? parsed.contentItems : demoData.contentItems,
+        news: Array.isArray(parsed.news) && parsed.news.length ? parsed.news : demoData.news,
       };
     }
   } catch {
@@ -92,6 +97,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setData(d => ({ ...d, hallMembers: [...d.hallMembers, { ...m, id: genId('hm') }] })),
       addCalendarEvent: e =>
         setData(d => ({ ...d, events: [...d.events, { ...e, id: genId('ev') }] })),
+      addNews: n =>
+        setData(d => ({ ...d, news: [{ ...n, id: genId('n') }, ...d.news] })),
       addFeaturedProject: p =>
         setData(d => ({
           ...d,

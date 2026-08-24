@@ -29,6 +29,7 @@ export default function App() {
   const [profileUserId, setProfileUserId] = useState<string | undefined>(undefined);
   const [profileEdits, setProfileEdits] = useState<Record<string, { bio?: string; photoUrl?: string }>>({});
   const [anadirTab, setAnadirTab] = useState<string | undefined>(undefined);
+  const [explorarNewsId, setExplorarNewsId] = useState<string | undefined>(undefined);
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
@@ -42,6 +43,7 @@ export default function App() {
     if (page === 'admin-confirmacion' && id) setValidacionId(id);
     if (page === 'perfil') setProfileUserId(id);
     if (page === 'admin-anadir') setAnadirTab(id);
+    if (page === 'explorar') setExplorarNewsId(id);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -106,7 +108,7 @@ export default function App() {
       case 'home':
         return <HomePage navigate={navigate} role={role} />;
       case 'explorar':
-        return <ExplorarPage navigate={navigate} />;
+        return <ExplorarPage key={explorarNewsId ?? 'explorar'} navigate={navigate} presetNewsId={explorarNewsId} />;
       case 'buscar':
         return <BuscarPage navigate={navigate} />;
       case 'detalle':

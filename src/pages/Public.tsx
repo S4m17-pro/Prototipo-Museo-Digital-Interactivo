@@ -10,6 +10,13 @@ const typeColors: Record<string, string> = {
   fundacion: '#d32f2f', logro: '#22c55e', evento: '#3b82f6', investigacion: '#a855f7'
 };
 
+function formatNewsDate(d: string) {
+  const date = new Date(`${d}T00:00:00`);
+  return isNaN(date.getTime())
+    ? d
+    : date.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function HeroTimeline({ navigate }: { navigate: (page: Page) => void }) {
   const { timeline } = useData();
   const [active, setActive] = useState(0);
@@ -119,6 +126,88 @@ function HeroTimeline({ navigate }: { navigate: (page: Page) => void }) {
   );
 }
 
+// ── NEWS CAROUSEL (rotación automática) ─────────────────────────────────────
+
+function NewsCarousel({ navigate }: { navigate: (page: Page, id?: string) => void }) {
+  const { news } = useData();
+  const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (hovered || news.length === 0) return;
+    const id = setInterval(() => setActive(a => (a + 1) % news.length), 5000);
+    return () => clearInterval(id);
+  }, [hovered, news]);
+
+  const go = (i: number) => setActive((i + news.length) % news.length);
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 md:px-8 pt-16">
+      <div className="flex items-end justify-between mb-4 flex-wrap gap-3">
+        <div>
+          <div className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color: '#d32f2f' }}>Mantente informado</div>
+          <h2 className="font-serif text-2xl md:text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Noticias</h2>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => go(active - 1)} aria-label="Noticia anterior"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-lg transition-transform hover:-translate-x-0.5"
+            style={{ border: '1px solid var(--border)', color: '#d32f2f', background: 'var(--card)' }}>
+            ‹
+          </button>
+          <button onClick={() => go(active + 1)} aria-label="Noticia siguiente"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-lg transition-transform hover:translate-x-0.5"
+            style={{ border: '1px solid var(--border)', color: '#d32f2f', background: 'var(--card)' }}>
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="relative rounded-lg overflow-hidden h-[340px] sm:h-[400px] group"
+        style={{ border: '1px solid var(--border)' }}
+      >
+        {news.map((n, i) => (
+          <article
+            key={n.id}
+            aria-hidden={i !== active}
+            onClick={() => navigate('explorar', n.id)}
+            className={`absolute inset-0 transition-opacity duration-700 cursor-pointer ${i === active ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+          >
+            <img src={n.image} alt={n.title} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.15) 100%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 max-w-3xl">
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <span className="text-xs font-mono px-2 py-0.5 rounded uppercase tracking-wider"
+                  style={{ background: 'rgba(211, 47, 47,0.85)', color: '#ffffff' }}>
+                  {n.category}
+                </span>
+                <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.6)' }}>{formatNewsDate(n.date)}</span>
+              </div>
+              <h3 className="font-serif text-xl md:text-3xl font-bold leading-snug mb-2" style={{ color: '#ffffff' }}>
+                {n.title}
+              </h3>
+              <p className="text-sm leading-relaxed line-clamp-2 max-w-2xl" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                {n.excerpt}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {news.map((_, i) => (
+          <button key={i} onClick={() => go(i)} aria-label={`Ir a la noticia ${i + 1}`}
+            className="h-1.5 rounded-full transition-all duration-300"
+            style={{ width: i === active ? 24 : 8, background: i === active ? '#d32f2f' : 'var(--border)' }} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ── HOME ────────────────────────────────────────────────────────────────────
 
 interface HomeProps {
@@ -208,6 +297,9 @@ export function HomePage({ navigate, role }: HomeProps) {
           </div>
         </div>
       </section>
+
+      {/* Noticias */}
+      <NewsCarousel navigate={navigate} />
 
       {/* Collections */}
       <section id="colecciones" className="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-24">
@@ -359,16 +451,25 @@ export function HomePage({ navigate, role }: HomeProps) {
 
 // ── EXPLORAR ─────────────────────────────────────────────────────────────────
 
-export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string) => void }) {
+export function ExplorarPage({ navigate, presetNewsId }: { navigate: (page: Page, id?: string) => void; presetNewsId?: string }) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const { contentItems } = useData();
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const { contentItems, news } = useData();
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [pill, setPill] = useState<{ left: number; top: number; width: number; height: number; ready: boolean }>({
     left: 0, top: 0, width: 0, height: 0, ready: false,
   });
 
+  useEffect(() => {
+    if (presetNewsId) {
+      setActiveCategory('noticias');
+      setSelectedNewsId(presetNewsId);
+    }
+  }, [presetNewsId]);
+
   const categories = [
     { id: null, label: 'Todo', icon: '📋', count: contentItems.length },
+    { id: 'noticias', label: 'Noticias', icon: '📰', count: news.length },
     { id: 'historia', label: 'Historia', icon: '🏛️', count: 142 },
     { id: 'investigacion', label: 'Investigación', icon: '🔬', count: 318 },
     { id: 'proyectos', label: 'Proyectos', icon: '🎓', count: 527 },
@@ -385,8 +486,14 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
     : contentItems;
   const visible = filtered.filter(i => i.status === 'publicado' || i.status === 'institucional');
 
+  const selectedNews = news.find(n => n.id === selectedNewsId);
   const activeLabel = categories.find(c => c.id === activeCategory)?.label || 'Todo';
   const activeIdx = categories.findIndex(c => c.id === activeCategory);
+
+  const handleCategoryClick = (id: string | null) => {
+    setActiveCategory(id);
+    setSelectedNewsId(null);
+  };
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -431,7 +538,7 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
                 ref={el => {
                   itemRefs.current[i] = el;
                 }}
-                onClick={() => setActiveCategory(c.id)}
+                onClick={() => handleCategoryClick(c.id)}
                 className={`sb-item group relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap lg:whitespace-normal text-left w-auto lg:w-full ${isActive ? '' : 'hover:translate-x-1'}`}
                 style={{ color: isActive ? '#ffffff' : 'var(--secondary-foreground)', animationDelay: `${Math.min(i * 50, 400)}ms` }}
               >
@@ -447,32 +554,80 @@ export function ExplorarPage({ navigate }: { navigate: (page: Page, id?: string)
 
         {/* Right — Content grid */}
         <div>
-          <div className="flex items-center gap-2 mb-5">
-            <h3 className="font-serif font-semibold text-lg" style={{ color: 'var(--foreground)' }}>
-              {activeLabel}
-            </h3>
-            <span key={`${activeCategory}-${visible.length}`} className="fade-up-delayed text-xs font-mono px-2 py-0.5 rounded"
-              style={{ background: 'rgba(211, 47, 47,0.08)', color: '#d32f2f' }}>
-              {visible.length} resultado{visible.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-
-          {visible.length > 0 ? (
-            <div key={String(activeCategory)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {visible.map((item, i) => (
-                <div key={item.id} className="fade-up-delayed h-full" style={{ animationDelay: `${Math.min(i * 50, 450)}ms` }}>
-                  <ContentCard item={item} navigate={navigate} />
+          {activeCategory === 'noticias' && selectedNews ? (
+            <div className="fade-up-delayed">
+              <button onClick={() => setSelectedNewsId(null)} className="text-xs btn-outline-primary px-4 py-2 rounded mb-5">
+                ← Volver a las noticias
+              </button>
+              <article className="museum-card rounded overflow-hidden">
+                <div className="relative h-[280px] md:h-[380px]">
+                  <img src={selectedNews.image} alt={selectedNews.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%)' }} />
+                  <div className="absolute bottom-4 left-5 right-5 flex items-center gap-3 flex-wrap">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded uppercase tracking-wider"
+                      style={{ background: 'rgba(211, 47, 47,0.85)', color: '#ffffff' }}>
+                      {selectedNews.category}
+                    </span>
+                    <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.75)' }}>{formatNewsDate(selectedNews.date)}</span>
+                  </div>
                 </div>
-              ))}
+                <div className="p-6 md:p-8 max-w-3xl">
+                  <h2 className="font-serif text-2xl md:text-3xl font-bold leading-snug mb-4" style={{ color: 'var(--foreground)' }}>{selectedNews.title}</h2>
+                  <p className="text-sm md:text-base leading-relaxed whitespace-pre-line" style={{ color: 'var(--secondary-foreground)' }}>{selectedNews.excerpt}</p>
+                </div>
+              </article>
             </div>
           ) : (
-            <div className="museum-card rounded py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
-              <span className="empty-float text-5xl">📂</span>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No hay contenido en esta categoría aún.</p>
-              <button onClick={() => setActiveCategory(null)} className="text-xs btn-outline-primary px-4 py-2 rounded mt-1">
-                Ver todas las colecciones
-              </button>
-            </div>
+            <>
+              <div className="flex items-center gap-2 mb-5">
+                <h3 className="font-serif font-semibold text-lg" style={{ color: 'var(--foreground)' }}>
+                  {activeLabel}
+                </h3>
+                <span key={`${activeCategory}-${activeCategory === 'noticias' ? news.length : visible.length}`} className="fade-up-delayed text-xs font-mono px-2 py-0.5 rounded"
+                  style={{ background: 'rgba(211, 47, 47,0.08)', color: '#d32f2f' }}>
+                  {(activeCategory === 'noticias' ? news : visible).length} resultado{(activeCategory === 'noticias' ? news : visible).length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {activeCategory === 'noticias' ? (
+                <div key="noticias" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {news.map((n, i) => (
+                    <button key={n.id} onClick={() => setSelectedNewsId(n.id)}
+                      className="museum-card rounded overflow-hidden text-left group fade-up-delayed flex flex-col"
+                      style={{ animationDelay: `${Math.min(i * 50, 450)}ms` }}>
+                      <div className="relative h-40 overflow-hidden">
+                        <img src={n.image} alt={n.title} className="w-full h-full object-cover opacity-80 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105" />
+                        <span className="absolute top-3 left-3 text-xs font-mono px-2 py-0.5 rounded uppercase tracking-wider"
+                          style={{ background: 'rgba(211, 47, 47,0.85)', color: '#ffffff' }}>
+                          {n.category}
+                        </span>
+                      </div>
+                      <div className="p-4 flex flex-col flex-1">
+                        <div className="text-xs font-mono mb-1" style={{ color: 'var(--muted-foreground)' }}>{formatNewsDate(n.date)}</div>
+                        <h4 className="font-serif font-semibold text-sm leading-snug mb-2 group-hover:text-primary transition-colors" style={{ color: 'var(--card-foreground)' }}>{n.title}</h4>
+                        <p className="text-xs leading-relaxed line-clamp-3 mt-auto" style={{ color: 'var(--muted-foreground)' }}>{n.excerpt}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : visible.length > 0 ? (
+                <div key={String(activeCategory)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {visible.map((item, i) => (
+                    <div key={item.id} className="fade-up-delayed h-full" style={{ animationDelay: `${Math.min(i * 50, 450)}ms` }}>
+                      <ContentCard item={item} navigate={navigate} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="museum-card rounded py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
+                  <span className="empty-float text-5xl">📂</span>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No hay contenido en esta categoría aún.</p>
+                  <button onClick={() => handleCategoryClick(null)} className="text-xs btn-outline-primary px-4 py-2 rounded mt-1">
+                    Ver todas las colecciones
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
