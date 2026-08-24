@@ -10,7 +10,7 @@ import { PerfilPage } from './pages/Perfil';
 // Auth pages
 import { LoginPage, TwoFAPage, RegistroPage } from './pages/Auth';
 // Student pages
-import { EstDashboard, EstFavoritos, EstContribuir } from './pages/Student';
+import { EstDashboard, EstAportes, EstFavoritos, EstContribuir } from './pages/Student';
 // Teacher pages
 import { DocDashboard, DocWizard, DocNotificaciones } from './pages/Teacher';
 // Admin pages
@@ -87,14 +87,14 @@ export default function App() {
 
   const noFooterPages: Page[] = [
     'login', '2fa', 'registro', 'perfil',
-    'est-dashboard', 'est-contribuir', 'est-favoritos',
+    'est-dashboard', 'est-contribuir', 'est-favoritos', 'est-aportes',
     'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
     'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
     'admin-registros', 'admin-hall-registro', 'admin-anadir',
   ];
 
   const sidebarPages: Page[] = [
-    'est-dashboard', 'est-favoritos', 'est-contribuir', 'progreso',
+    'est-dashboard', 'est-aportes', 'est-favoritos', 'est-contribuir', 'progreso',
     'doc-dashboard', 'doc-wizard', 'doc-notificaciones',
     'admin-dashboard', 'admin-usuarios', 'admin-cola', 'admin-validacion', 'admin-confirmacion',
     'admin-registros', 'admin-hall-registro', 'admin-anadir',
@@ -143,6 +143,8 @@ export default function App() {
       // ── ESTUDIANTE / EGRESADO ──
       case 'est-dashboard':
         return <EstDashboard navigate={navigate} favorites={favorites} onToggleFavorite={toggleFavorite} role={role} />;
+      case 'est-aportes':
+        return <EstAportes navigate={navigate} role={role} />;
       case 'est-favoritos':
         return <EstFavoritos navigate={navigate} favorites={favorites} onToggleFavorite={toggleFavorite} />;
       case 'est-contribuir':

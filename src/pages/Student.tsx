@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { teacherOptions, getDemoUserForRole, getContributionsFor } from '../data';
-import type { Page, Role } from '../data';
+import type { ContentItem, Page, Role } from '../data';
 import { useData } from '../context/DataContext';
 import { ContentCard, StatusBadge, SectionHeader, StatCard, StepIndicator, Checkbox, EmptyState } from '../components/UI';
 import { DashboardSidebar } from '../components/Layout';
@@ -110,9 +110,14 @@ export function EstDashboard({ navigate, favorites, role = 'estudiante' }: Props
                 )) : (
                   <EmptyState message="No tienes contribuciones pendientes de revisión." icon="✓" />
                 )}
-                <button onClick={() => navigate('est-contribuir')} className="text-xs btn-outline-primary px-3 py-1.5 rounded mt-1 w-full">
-                  + Agregar nueva contribución
-                </button>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <button onClick={() => navigate('est-aportes')} className="text-xs btn-outline-primary px-3 py-1.5 rounded">
+                    Ver mis aportes →
+                  </button>
+                  <button onClick={() => navigate('est-contribuir')} className="text-xs btn-outline-primary px-3 py-1.5 rounded">
+                    + Agregar nueva
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -153,6 +158,138 @@ export function EstFavoritos({ navigate, favorites, onToggleFavorite }: Props) {
                     style={{ background: 'rgba(0,0,0,0.7)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47,0.4)' }}>
                     ★
                   </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── MIS APORTES ───────────────────────────────────────────────────────────────
+
+type AporteFilter = 'todos' | 'publicados' | 'pendientes' | 'devueltos';
+
+const aporteFilterLabels: Record<AporteFilter, string> = {
+  todos: 'Todos',
+  publicados: 'Publicados',
+  pendientes: 'Pendientes',
+  devueltos: 'Devueltos',
+};
+
+const isPublishedStatus = (s: ContentItem['status']) => s === 'publicado' || s === 'institucional';
+
+const formatDate = (d: string) => {
+  const date = new Date(`${d}T00:00:00`);
+  return isNaN(date.getTime()) ? d : date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+interface AportesProps {
+  navigate: (page: Page, id?: string) => void;
+  role?: Role;
+}
+
+export function EstAportes({ navigate, role = 'estudiante' }: AportesProps) {
+  const [filter, setFilter] = useState<AporteFilter>('todos');
+  const me = getDemoUserForRole(role);
+  const myContent = me ? getContributionsFor(me).slice().sort((a, b) => b.date.localeCompare(a.date)) : [];
+
+  const counts: Record<AporteFilter, number> = {
+    todos: myContent.length,
+    publicados: myContent.filter(i => isPublishedStatus(i.status)).length,
+    pendientes: myContent.filter(i => i.status === 'pendiente').length,
+    devueltos: myContent.filter(i => i.status === 'devuelto').length,
+  };
+  const filtered = myContent.filter(i =>
+    filter === 'todos' ||
+    (filter === 'publicados' && isPublishedStatus(i.status)) ||
+    (filter === 'pendientes' && i.status === 'pendiente') ||
+    (filter === 'devueltos' && i.status === 'devuelto')
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+      <div className="flex gap-8">
+        <DashboardSidebar role="estudiante" currentPage="est-aportes" navigate={navigate} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
+            <SectionHeader
+              label="Mis contribuciones"
+              title="Mis Aportes"
+              subtitle={`${counts.todos} aportes · ${counts.publicados} publicados · ${counts.pendientes + counts.devueltos} en proceso`}
+            />
+            <button onClick={() => navigate('est-contribuir')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold">
+              + Nueva Contribución
+            </button>
+          </div>
+
+          <div className="flex gap-2 flex-wrap mb-6">
+            {(Object.keys(aporteFilterLabels) as AporteFilter[]).map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:-translate-y-0.5"
+                style={{
+                  background: filter === f ? '#d32f2f' : 'var(--muted)',
+                  color: filter === f ? '#ffffff' : 'var(--secondary-foreground)',
+                  border: `1px solid ${filter === f ? '#d32f2f' : 'var(--border)'}`,
+                }}>
+                {aporteFilterLabels[f]} <span className="font-mono opacity-70">{counts[f]}</span>
+              </button>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+              <span className="text-5xl opacity-20">🗂️</span>
+              <p style={{ color: 'var(--muted-foreground)' }}>
+                {filter === 'todos'
+                  ? 'Aún no has realizado contribuciones. Comparte tu primer proyecto o investigación.'
+                  : `No tienes aportes ${aporteFilterLabels[filter].toLowerCase()}.`}
+              </p>
+              {filter === 'todos' && (
+                <button onClick={() => navigate('est-contribuir')} className="btn-outline-primary px-5 py-2 rounded text-sm">
+                  Registrar Contribución
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {filtered.map(item => (
+                <div key={item.id} onClick={() => navigate('detalle', item.id)}
+                  className="museum-card rounded p-4 flex items-start gap-4 cursor-pointer group transition-transform hover:-translate-y-0.5">
+                  <img src={item.image} alt={item.title} className="w-20 h-20 rounded object-cover flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                      <span className="text-xs px-2 py-0.5 rounded-full font-mono"
+                        style={{ background: 'rgba(211, 47, 47,0.1)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47,0.25)' }}>
+                        {item.category}
+                      </span>
+                      <StatusBadge status={item.status} />
+                      <span className="text-xs font-mono ml-auto" style={{ color: 'var(--muted-foreground)' }}>{formatDate(item.date)}</span>
+                    </div>
+                    <h4 className="font-serif font-semibold text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors" style={{ color: 'var(--card-foreground)' }}>
+                      {item.title}
+                    </h4>
+                    <p className="text-xs line-clamp-2 mb-2" style={{ color: 'var(--muted-foreground)' }}>{item.description}</p>
+                    {item.tags.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap">
+                        {item.tags.map(t => (
+                          <span key={t} className="text-[10px] px-1.5 py-0.5 rounded"
+                            style={{ background: 'rgba(211, 47, 47,0.06)', color: 'var(--secondary-foreground)', border: '1px solid var(--border)' }}>
+                            #{t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {item.reviewNote && (
+                      <div className="text-xs px-3 py-2 rounded mt-2"
+                        style={{ background: 'rgba(249,115,22,0.08)', color: '#fb923c', border: '1px solid rgba(249,115,22,0.25)' }}>
+                        <strong>Nota del revisor:</strong> {item.reviewNote}
+                      </div>
+                    )}
+                  </div>
+                  <span className="self-center opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" style={{ color: '#d32f2f' }}>→</span>
                 </div>
               ))}
             </div>

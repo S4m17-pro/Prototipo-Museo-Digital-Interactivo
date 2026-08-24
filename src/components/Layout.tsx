@@ -255,6 +255,7 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
   const links: Record<string, SidebarLink[]> = {
     estudiante: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
+      { label: 'Mis Aportes', page: 'est-aportes', icon: '🗂️' },
       { label: 'Progreso', page: 'progreso', icon: '🏆' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
       { label: 'Contribuir', page: 'est-contribuir', icon: '↑' },
@@ -267,6 +268,7 @@ export function DashboardSidebar({ role, currentPage, navigate }: SidebarProps) 
     admin: getAdminNavLinks(),
     egresado: [
       { label: 'Mi Dashboard', page: 'est-dashboard', icon: '⊞' },
+      { label: 'Mis Aportes', page: 'est-aportes', icon: '🗂️' },
       { label: 'Progreso', page: 'progreso', icon: '🏆' },
       { label: 'Favoritos', page: 'est-favoritos', icon: '♡' },
       { label: 'Contribuir', page: 'est-contribuir', icon: '↑' },
