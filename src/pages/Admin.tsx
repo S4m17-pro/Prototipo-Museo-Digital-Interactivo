@@ -49,7 +49,7 @@ export function AdminDashboard({ navigate }: { navigate: (page: Page, id?: strin
             <div>
               <div className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color: '#d32f2f' }}>Administración</div>
               <h1 className="font-serif text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Dashboard</h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Panel de control del Museo Digital Interactivo</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Panel de control de Herencia Digital</p>
             </div>
             <button onClick={() => navigate('admin-cola')} className="btn-primary px-5 py-2.5 rounded text-sm font-semibold flex items-center gap-2">
               Cola de Contenido

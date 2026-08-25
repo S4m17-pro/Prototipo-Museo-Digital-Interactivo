@@ -62,7 +62,7 @@ export function PerfilPage({ role, navigate, viewUserId, profileEdits, onUpdateP
       <SectionHeader
         label="Identidad"
         title={title}
-        subtitle={isOwner ? 'Tu información dentro del Museo Digital Interactivo.' : 'Información pública dentro del Museo Digital Interactivo.'}
+        subtitle={isOwner ? 'Tu información dentro de Herencia Digital.' : 'Información pública dentro de Herencia Digital.'}
       />
 
       <div className="flex flex-col lg:flex-row gap-8">
