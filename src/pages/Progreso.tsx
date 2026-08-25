@@ -78,7 +78,7 @@ export function ProgresoPage({ role, navigate }: ProgresoProps) {
         <div className="flex gap-8">
           <DashboardSidebar role={role} currentPage="progreso" navigate={navigate} />
           <div className="flex-1 min-w-0">
-            <SectionHeader label="Gamificación" title="Progreso" subtitle="Tu avance dentro del Museo Digital Interactivo." />
+            <SectionHeader label="Gamificación" title="Progreso" subtitle="Tu avance dentro de Herencia Digital." />
             <ProgresoPersonal me={me} />
             {ranking}
           </div>

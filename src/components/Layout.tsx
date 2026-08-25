@@ -126,7 +126,7 @@ export function Header({ currentPage, role, navigate, onLogout, theme, onToggleT
           <Logo />
           <div className="hidden sm:block">
             <div className="font-serif text-sm font-bold leading-none" style={{ color: '#d32f2f' }}>UniLibreTour</div>
-            <div className="text-xs leading-none mt-0.5" style={{ color: 'var(--muted-foreground)' }}>Museo Digital Interactivo</div>
+            <div className="text-xs leading-none mt-0.5" style={{ color: 'var(--muted-foreground)' }}>Herencia Digital</div>
           </div>
         </button>
 
@@ -215,7 +215,7 @@ export function Footer({ navigate }: FooterProps) {
         <div>
           <div className="font-serif text-lg font-bold mb-1" style={{ color: '#d32f2f' }}>UniLibreTour</div>
           <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            Museo Digital Interactivo del Programa de Ingeniería de Sistemas — Universidad Libre, Colombia.
+            Herencia Digital · Programa de Ingeniería de Sistemas — Universidad Libre, Colombia.
           </p>
           <p className="text-xs mt-3 font-mono" style={{ color: 'var(--muted-foreground)' }}>© 2025 Universidad Libre · Todos los derechos reservados</p>
         </div>

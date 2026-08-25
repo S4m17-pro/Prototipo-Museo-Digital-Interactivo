@@ -254,8 +254,8 @@ export function HomePage({ navigate, role }: HomeProps) {
               </div>
 
               <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-black leading-none mb-5" style={{ color: 'var(--foreground)' }}>
-                Museo Digital<br />
-                <span className="text-primary-gradient italic">Interactivo</span>
+                Herencia<br />
+                <span className="text-primary-gradient italic">Digital</span>
               </h1>
               <p className="text-base md:text-lg max-w-lg mb-8 leading-relaxed" style={{ color: 'var(--secondary-foreground)' }}>
                 Archivo vivo del Programa de Ingeniería de Sistemas — Universidad Libre. Historia, investigación y logros que inspiran generaciones.

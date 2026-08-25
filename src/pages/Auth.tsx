@@ -251,7 +251,7 @@ export function RegistroPage({ navigate, onRegister }: RegistroProps) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-serif text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Crear cuenta</h1>
-          <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Únete al Museo Digital Interactivo UniLibreTour</p>
+          <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Únete a Herencia Digital · UniLibreTour</p>
         </div>
 
         {/* Step indicator */}
